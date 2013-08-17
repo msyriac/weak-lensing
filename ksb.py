@@ -206,12 +206,16 @@ def estimate(n,p,g1,g2,el,s,show_last_gal,plot_progression,update_freq):
 
     print "\nApplied shear is " + str(shear)
 
-    p=np.array(py)
-    inf=p.mean()
-    print "Inferred shear1 is", inf, "+/-", p.std()/sqrt(len(p)), "off by ", (inf-shear[0])*100/shear[0], " %"
-    p=np.array(py2)
-    inf=p.mean()
-    print "Inferred shear2 is", inf, "+/-", p.std()/sqrt(len(p)), "off by ", (inf-shear[1])*100/shear[1], " %\n"
+
+    for i, pp in enumerate([py,py2]):
+        ## we are doing this clever rotation
+        ## so we need to reduce by 2
+        pp=[ (pp[2*c]+pp[2*c+1])/2.0 for c in range(len(pp)/2)]
+        p=np.array(pp)
+        inf=p.mean()
+        sh=shear[i]
+        err=p.std()/sqrt(len(p))
+        print "Inferred shear"+str(i+1)+" is", inf, "+/-", err, "off by ", (inf-sh)*100/sh, " %", (inf-sh)/err, " sigma"
 
     if show_last_gal:
         plt.imshow(img.array, interpolation='nearest')
