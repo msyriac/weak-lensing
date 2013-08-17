@@ -171,7 +171,7 @@ def estimate(n,p,g1,g2,el,s,show_last_gal,plot_progression,update_freq):
         #print img.array
         q = getQuad(img.array,*np.shape(img.array))
         E=polE(q)
-        print img.array
+        #print img.array
         #print q
         #print E
     
