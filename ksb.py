@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import galsim
 import matplotlib.pyplot as plt
 import numpy as np
