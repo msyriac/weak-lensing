@@ -272,8 +272,12 @@ def estimate(n,p,g1,g2,el,s,show_last_gal,plot_progression,update_freq,M,make_ow
             else:
                 shea2.append(inf)
 
-    print "Final mean shear1 is ", np.array(shea1).mean()
-    print "Final mean shear2 is ", np.array(shea2).mean()
+    inf=np.array(shea1).mean()
+    sh=shear[0]
+    print "Final mean shear1 is ", inf, " off by ", (inf-sh)*100/sh, " %"
+    inf=np.array(shea2).mean()
+    sh=shear[1]
+    print "Final mean shear2 is ", inf, " off by ", (inf-sh)*100/sh, " %"
 
 
 
