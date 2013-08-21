@@ -5,7 +5,7 @@ import numpy as np
 from math import *
 #import timeit
 import sys, getopt
-
+import cmath
 
 
 
@@ -64,16 +64,18 @@ def main(argv):
     plot_progression=False
     update_freq=100
     gal_sigma=2.0
+    make_own=False
+    M=1
     
     try:
-        opts, args = getopt.getopt(argv,"PIhn:p:1:2:e:s:u:M:")
+        opts, args = getopt.getopt(argv,"oPIhn:p:1:2:e:s:u:M:")
     except getopt.GetoptError:
         print "My programmer is stupid, so I don't understand the arguments you passed. Run with -h to see available options."
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
             print 'python ksb.py -n <number of galaxies> -p <stamp pixels> -1 <shear component 1> -2 <shear component 2> -e <ellipticity> -s <galaxy sigma in pixels> -M <number of rotations>'
-            print 'Add -P if you want to see a plot of estimated shear as a function of n, -I if you want to see an image of the last galaxy -- don\'t use both together'
+            print 'Add -P if you want to see a plot of estimated shear as a function of n, -I if you want to see an image of the last galaxy -- don\'t use both together. -o if you want to make your own ellipse'
             sys.exit()
         elif opt == "-n":
             n=int(arg)
@@ -95,11 +97,13 @@ def main(argv):
             show_last_gal=True
         elif opt == "-M":
             M=int(arg)
+        elif opt == "-o":
+            make_own=True
 
-    estimate(n,p,g1,g2,el,gal_sigma,show_last_gal,plot_progression,update_freq,M)
+    estimate(n,p,g1,g2,el,gal_sigma,show_last_gal,plot_progression,update_freq,M,make_own)
 
 
-def estimate(n,p,g1,g2,el,s,show_last_gal,plot_progression,update_freq,M):
+def estimate(n,p,g1,g2,el,s,show_last_gal,plot_progression,update_freq,M,make_own):
 
 
     shear=[]
@@ -180,8 +184,12 @@ def estimate(n,p,g1,g2,el,s,show_last_gal,plot_progression,update_freq,M):
             final=galsim.Convolve([gal,pix])
             final.draw(img)
 
-        
-            q = getQuad(img.array,*np.shape(img.array))
+            if make_own==False:
+                imga=img.array
+            else:
+                imga=drawEllipse(s1,s2,stamp_xsize,stamp_ysize,gal_sigma)
+
+            q = getQuad(imga,*np.shape(imga))
             E=polE(q)
             
     
@@ -306,6 +314,22 @@ def save_gals(n, stamp_xsize, stamp_ysize, gal_sigma, sh1, sh2):
         print "Saved galaxy " + str(i)
 
 
+def drawEllipse(s1,s2, nx, ny,sigma):
+    z=s1*2+s2*2*1j
+    phi=-cmath.phase(z)/2.
+    r=abs(z)
+    boa=sqrt((1.-r)/(1.+r))
+    img=np.zeros((nx,ny))
+    a=sigma
+    b=boa*a
+    for i in range(0,nx):
+        xp=0.5+i-(nx)/2.0        
+        for j in range(0,ny):
+            yp=0.5+j-(ny)/2.0
+            x=cos(phi)*xp-sin(phi)*yp
+            y=sin(phi)*xp+cos(phi)*yp
+            img[j,i]=exp(-((x*x)/(a*a))-((y*y)/(b*b)))
+    return img
 
     
 if __name__=="__main__":
