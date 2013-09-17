@@ -5,7 +5,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 import pylab, math,random
 
 class ToyGenerator:
-    def __init__ (self, g1, g2, sig_i):
+    def __init__ (self, g1, g2, sig_pr): # Changed sig_i to sig_pr
         self.g1=g1
         self.g2=g2
         
@@ -13,14 +13,16 @@ class ToyGenerator:
         ## prob given in eq 18 of Bernstein and Armstrong:
 
         x=linspace(0,1.0,100)
-        y=array([quad(lambda x:x*(1-x*x)**x*exp(-x**2/(2*0.3**2)),0,a)[0] for a in x])
+        #y=array([quad(lambda x:x*(1-x*x)**x*exp(-x**2/(2*0.3**2)),0,a)[0] for a in x]) # Typo? Should be x^2 not x^x, also changed 0.3 to sig_pr -Mat
+        y=array([quad(lambda x:x*(1-x*x)**2*exp(-x**2/(2*sig_pr**2)),0,a)[0] for a in x])
         y/=y[-1]
-        print x
-        print y
+        #print x
+        #print y
 
 
-        self.genI=InterpolatedUnivariateSpline(y,x)
-        xx=arange(0,1,0.0001)
+        self.genI=InterpolatedUnivariateSpline(y,x) # This is to invert the CDF right? Just making sure. - Mat
+        print self.genI
+        #xx=arange(0,1,0.0001)
         #pylab.plot(y,x,'ro')
         #pylab.plot(xx,map(self.genI,xx),'r-')
         #pylab.show()
@@ -37,10 +39,11 @@ class ToyGenerator:
         e2=E*sin(theta)
 
         ##intrinsic ellipticty now shear
-        ### MAT CHECK THE SHIT BELOW
-        corrfact=1/(1-(e1*self.g1+e2*self.g2))
-        e1=(e1+self.g1)*corrfact
-        e2=(e2+self.g2)*corrfact
+        ### MAT CHECK THE SHIT BELOW # Corrected to agree with Seitz and Schneider 1997 Eq 3.2 -Mat
+        # This is cut off at second order. Try using full expression if encountering problems later.
+        corrfact=1/(1-(2*e1*self.g1+2*e2*self.g2))
+        e1=(e1-self.g1)*corrfact
+        e2=(e2-self.g2)*corrfact
         
         ### now add error
         e1+=random.gauss(0,sigma)
