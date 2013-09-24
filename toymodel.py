@@ -205,14 +205,14 @@ if __name__=="__main__":
         D1=getDerivative(1,em,[0.,0.])
         D2=getDerivative(2,em,[0.,0.])
 
-        
-        
         print "Input em is ", em
         print "Zeroth derivative is ",P0
-        print "Analytic first derivative is ", D1, " as compared to numerical " ,[D1N1,D1N2], "with percentage difference",[(D1N1-D1[0])*100/D1[0], (D1N2-D1[1])*100/D1[1]], "%"
-        print "Analytic second derivative is ", D2, " as compared to numerical " ,[D2N11,D2N12,D2N22], "with percentage difference",[(D2N11-D2[0])*100/D2[0], (D2N12-D2[1])*100/D2[1], (D2N22-D2[2])*100/D2[2]], "%"
-
-
+        print "Analytic  first derivative is ", D1
+        print "Numerical first derivative is " ,[D1N1,D1N2]
+        print "Percentage difference is ",[(D1N1-D1[0])*100/D1[0], (D1N2-D1[1])*100/D1[1]], "%"
+        print "Analytic  second derivative is ", D2
+        print "Numerical second derivative is " ,[D2N11,D2N12,D2N22]
+        print "Percentage difference is ",[(D2N11-D2[0])*100/D2[0], (D2N12-D2[1])*100/D2[1], (D2N22-D2[2])*100/D2[2]], "%"
 
         
 
