@@ -192,14 +192,23 @@ if __name__=="__main__":
         #Zeroth derivative
         P0=getDerivative(0,em,[0.,0.])
 
+
+        #Finite Differences
+        Forward1=getDerivative(0,em,[eps,0.])
+        Backward1=getDerivative(0,em,[-eps,0.])
+        Forward2=getDerivative(0,em,[0.0,eps])
+        Backward2=getDerivative(0,em,[0.0,-eps])
+        For1For2=getDerivative(0,em,[eps,eps])
+        Bak1Bak2=getDerivative(0,em,[-eps,-eps])
+
         #Central finite difference for first derivative
-        D1N1=(getDerivative(0,em,[eps,0.])-getDerivative(0,em,[-eps,0.]))/(2*eps)
-        D1N2=(getDerivative(0,em,[0.0,eps])-getDerivative(0,em,[0.0,-eps]))/(2*eps)
+        D1N1=(Forward1-Backward1)/(2*eps)
+        D1N2=(Forward2-Backward2)/(2*eps)
 
         #Central finite differences for second derivative
-        D2N11=(getDerivative(0,em,[eps,0.])-2*P0+getDerivative(0,em,[-eps,0.]))/eps**2
-        D2N12=(getDerivative(0,em,[eps,eps]) - getDerivative(0,em,[eps,-eps]) - getDerivative(0,em,[-eps,eps]) + getDerivative(0,em,[-eps,-eps]) )/(4*eps**2) # more efficient exists
-        D2N22=(getDerivative(0,em,[0.0,eps])-2*P0+getDerivative(0,em,[0.0,-eps]))/eps**2
+        D2N11=(Forward1-2*P0+Backward1)/eps**2
+        D2N12=(For1For2-Forward1-Forward2+2*P0-Backward1-Backward2+Bak1Bak2)/(2*eps**2)
+        D2N22=(Forward2-2*P0+Backward2)/eps**2
 
         #Analytical first and second derivatives
         D1=getDerivative(1,em,[0.,0.])
