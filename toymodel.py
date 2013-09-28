@@ -71,7 +71,7 @@ class ToyGenerator:
             e1m=e1+random.gauss(0,sigma_e)
             e2m=e2+random.gauss(0,sigma_e)
         
-            ee=sqrt(e1**2+e2**2)
+            ee=sqrt(e1m**2+e2m**2) # Changed from e1 to e1m - Mat
             if (ee<1): ## requier they fall onto <1
                 ok=True
             
