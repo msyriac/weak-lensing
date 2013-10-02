@@ -61,6 +61,7 @@ class ToyGenerator:
         e1=E*cos(theta)
         e2=E*sin(theta)
         #print e1,e2
+
         ##intrinsic ellipticty now shear
         e1,e2=shear([e1,e2],[self.g1,self.g2])
         
@@ -81,15 +82,9 @@ class ToyGenerator:
         
 
 
-def LikeZeroDer(es1,es2): #,ggg_):
-    #if (ggg_!=[0.,0.]): print ggg_
-    #eo=shear([es1,es2],ggg_)
-    eo=[es1,es2] #####
+def LikeZeroDer(es1,es2):
+    eo=[es1,es2]
     dlta2=(em1-eo[0])**2+(em2-eo[1])**2
-    #print es1, es2
-    #print em1, em2, eo[0], eo[1]
-    #print sm2
-    #print dlta2
     return exp(-dlta2/(2*sm2))
 
 
@@ -98,64 +93,24 @@ def LikeZeroDer(es1,es2): #,ggg_):
 def LikeFirstDer1(es1,es2):
 
     dlta2=(em1-es1)**2+(em2-es2)**2
-
-    
-    #em12=em1**2
-    #em14=em1s**2
-
-    #em22=em2**2
-    #em24=em2s**2
-
     es12=es1**2
-    #es14=es1s**2
 
     es22=es2**2
-    #es24=es2s**2
 
     return exp(-dlta2/(2*sm2))*(-em1+em1*es12+es1-es12*es1+2*em2*es1*es2-em1*es22-es1*es22)/sm2
 
 def LikeFirstDer2(es1,es2):
 
     dlta2=(em1-es1)**2+(em2-es2)**2
-
-    
-    #em12=em1**2
-    #em14=em1s**2
-
-    #em22=em2**2
-    #em24=em2s**2
-
     es12=es1**2
-    #es14=es1s**2
-
     es22=es2**2
-    #es24=es2s**2
-
-
-
-    
     return exp(-dlta2/(2*sm2))*(-em2+em2*es22+es2-es22*es2+2*em1*es2*es1-em2*es12-es2*es12)/sm2
 
 def LikeSecondDer11(es1,es2):
 
     dlta2=(em1-es1)**2+(em2-es2)**2
-
-    
-    #em12=em1**2
-    #em14=em1s**2
-
-    #em22=em2**2
-    #em24=em2s**2
-
     es12=es1**2
-    #es14=es1s**2
-
     es22=es2**2
-    #es24=es2s**2
-
-    #return exp(-dlta*dlta/(2*sm**2))*(((em1 - es1)*(-1 + es1**2) + 2*em2*es1*es2 - (em1 + es1)*es2**2)**2 + (2*em1*es1*(-1 + es1**2 - 3*es2**2) - (-1 + 3*es1**2 - es2**2)*(-1 + es1**2 - 2*em2*es2 + es2**2))*sm**2)/sm**4
-    
-
     return exp(-dlta2/(2*sm2))*(((em1 - es1)*(-1 + es12) + 2*em2*es1*es2 - (em1 + es1)*es22)**2 + (2*em1*es1*(-1 + es12 - 3*es22) - (-1 + 3*es12 - es22)*(-1 + es12 - 2*em2*es2 + es22))*sm2)/sm4
     
 
@@ -163,59 +118,35 @@ def LikeSecondDer22(es1,es2):
 
 
     dlta2=(em1-es1)**2+(em2-es2)**2
-
-    
-    #em12=em1**2
-    #em14=em1s**2
-
-    #em22=em2**2
-    #em24=em2s**2
-
     es12=es1**2
     es14=es12**2
 
     es22=es2**2
-    #es24=es2s**2
-
-    #return exp(-dlta*dlta/(2*sm**2))*((em2*(1 + es1**2 - es2**2) + es2*(-1 - 2*em1*es1 + es1**2 + es2**2))**2 + (es1**4 - 2*es1**2*es2*(3*em2 + es2) + (1 + 2*em2*es2 - 3*es2**2)*(-1 + es2**2) - 2*em1*(es1 + es1**3 - 3*es1*es2**2))*sm**2)/sm**4
     return exp(-dlta2/(2*sm2))*((em2*(1 + es12 - es22) + es2*(-1 - 2*em1*es1 + es12 + es22))**2 + (es14 - 2*es12*es2*(3*em2 + es2) + (1 + 2*em2*es2 - 3*es22)*(-1 + es22) - 2*em1*(es1 + es12*es1 - 3*es1*es22))*sm2)/sm4
 
 
 def LikeSecondDer12(es1,es2):
     dlta2=(em1-es1)**2+(em2-es2)**2
-
-    
-
     es12=es1**2
     es14=es12**2
 
     es22=es2**2
     es24=es22**2
 
-
-    #return exp(-dlta*dlta/(2*sm**2))*(2*em1**2*es1*es2*(-1 + es1**2 - es2**2) + es1*(2*em2**2*es2*(-1 - es1**2 + es2**2) + es2*(-1 + es1**2 + es2**2)*(-1 + es1**2 + es2**2 - 4*sm**2) + em2*(-1 + 4*es2**2 + (es1**2 - 3*es2**2)*(es1**2 + es2**2 - 2*sm**2))) + em1*(-(em2*(-1 + es1**4 - 6*es1**2*es2**2 + es2**4)) + es2*(-1 - 3*es1**4 + es2**4 - 2*es2**2*sm**2 + es1**2*(4 - 2*es2**2 + 6*sm**2))))/sm**4
     return exp(-dlta2/(2*sm2))*(2*em12*es1*es2*(-1 + es12 - es22) + es1*(2*em22*es2*(-1 - es12 + es22) + es2*(-1 + es12 + es22)*(-1 + es12 + es22 - 4*sm2) + em2*(-1 + 4*es22 + (es12 - 3*es22)*(es12 + es22 - 2*sm2))) + em1*(-(em2*(-1 + es14 - 6*es12*es22 + es24)) + es2*(-1 - 3*es14 + es24 - 2*es22*sm2 + es12*(4 - 2*es22 + 6*sm2))))/sm4
     
 
 
 def getDerivative (d,em,gg):
-    global em_
     #global gg_
-    em_=em
     #gg_=gg
     if d==0:
-        #return dblquad (zeroDer,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         return dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
     if d==1:
-        #fder1=dblquad (firstDer1,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
-        #fder2=dblquad (firstDer2,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         fder1=dblquad (IntegrandQ1,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         fder2=dblquad (IntegrandQ2,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         return [fder1,fder2]
     if d==2:
-        #sder11=dblquad (secondDer11,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
-        #sder12=dblquad (secondDer12,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
-        #sder22=dblquad (secondDer22,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         sder11=dblquad (IntegrandR11,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         sder12=dblquad (IntegrandR12,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         sder22=dblquad (IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
@@ -225,76 +156,22 @@ def getDerivative (d,em,gg):
 
 
 def IntegrandP(es0,es1):
-    #ggg_=[0.,0.] ####
-    return fEprior(es0,es1)*LikeZeroDer(es0,es1) #,[0.,0.])
+    return fEprior(es0,es1)*LikeZeroDer(es0,es1)
 
-#def derivP(es0,es1,gg):
-    #ggg_=gg
-    #print ggg_
-    #return fEprior(es0,es1)*LikeZeroDer(es0,es1,gg)
 
 def IntegrandQ1(es0,es1):
-
-    ####
-    #P0=derivP(es0,es1,[0.,0.])
-
-    #Finite Differences
-    #Forward1=derivP(es0,es1,[eps,0.])
-    #Backward1=derivP(es0,es1,[-eps,0.])
-    #Central finite difference for first derivative
-    #return ((Forward1-Backward1)/(2*eps))
-
-    #Central finite differences for second derivative
-
-  
-    #####    
-    
-    
     return fEprior(es0,es1)*LikeFirstDer1(es0,es1)
 
 def IntegrandQ2(es0,es1):
-    #P0=derivP(es0,es1,[0.,0.])
-
-    #Forward2=derivP(es0,es1,[0.0,eps])
-    #Backward2=derivP(es0,es1,[0.0,-eps])
-    #return ((Forward2-Backward2)/(2*eps))
-
-    
     return fEprior(es0,es1)*LikeFirstDer2(es0,es1)
 
 def IntegrandR11(es0,es1):
-
-    #P0=derivP(es0,es1,[0.,0.])
-
-    #Finite Differences
-    #Forward1=derivP(es0,es1,[eps,0.])
-    #Backward1=derivP(es0,es1,[-eps,0.])
-    #return ((Forward1-2*P0+Backward1)/eps**2)
-     
     return fEprior(es0,es1)*LikeSecondDer11(es0,es1)
 
 def IntegrandR12(es0,es1):
-    #P0=derivP(es0,es1,[0.,0.])
-
-    #Finite Differences
-    #Forward2=derivP(es0,es1,[0.0,eps])
-    #Backward2=derivP(es0,es1,[0.0,-eps])
-    #return ((Forward2-2*P0+Backward2)/eps**2)
-
-    
     return fEprior(es0,es1)*LikeSecondDer12(es0,es1)
 
 def IntegrandR22(es0,es1):
-    #P0=derivP(es0,es1,[0.,0.])
-
-    #Forward1=derivP(es0,es1,[eps,0.])
-    #Backward1=derivP(es0,es1,[-eps,0.])
-    #Forward2=derivP(es0,es1,[0.0,eps])
-    #Backward2=derivP(es0,es1,[0.0,-eps])
-    #For1For2=derivP(es0,es1,[eps,eps])
-    #Bak1Bak2=derivP(es0,es1,[-eps,-eps])
-    #return ((For1For2-Forward1-Forward2+2*P0-Backward1-Backward2+Bak1Bak2)/(2*eps**2))
-
     return fEprior(es0,es1)*LikeSecondDer22(es0,es1)
 
 
@@ -310,30 +187,20 @@ if __name__=="__main__":
 
     global sp2twice
     global tol
+
     tol=1.49e-01
 
-    #global eps
-    #global ggg_
-    #ggg_=[0.,0.]
-
     sp2twice=2*sig_pr**2
-
-    
-
     sm2=sigma_e**2
     sm4=sm2**2
     
     appG=numpy.matrix([[0.01],[0.02]])
 
-    print appG
+    print "Applied shear is ",appG
     
     A=ToyGenerator(appG.flat[0],appG.flat[1])
     #eps=0.001
-    random.seed(1241)#3)
-    #P=[]
-    #Q=[]
-    #R=[]
-    #Q_norm=[]
+    random.seed(12296)#3)
 
     Cinv=numpy.zeros((2,2))
     Qsum=0
@@ -342,16 +209,15 @@ if __name__=="__main__":
     x=[]
 
     started=time.time()
+    fileappend=str(started)
 
-    freq=5
+    freq=50
     tottime=0
     k=0
 
 
-    n=10000
-    #print LikeZeroDer(0.1,-0.1)
-    #print gg_
-    
+    n=20000
+
     for i in range(n):
         
         em=A.generate()
@@ -359,10 +225,8 @@ if __name__=="__main__":
         em2=em[1]
 
         em12=em1**2
-        #em14=em1s**2
 
         em22=em2**2
-        #em24=em2s**2
 
         
         P=(dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0])
@@ -405,9 +269,10 @@ if __name__=="__main__":
             p.clf()
             p.plot(x,biasp1)
             p.plot(x,biasp2)
-            p.savefig('bias.png')
+            p.savefig('bias'+fileappend+'.png')
 
-        '''    
+        '''
+        #Code to check correctness of analytical derivatives
         #Zeroth derivative
     
         P0=getDerivative(0,em,[0.,0.])
@@ -434,8 +299,6 @@ if __name__=="__main__":
         D1=getDerivative(1,em,[0.,0.])
         D2=getDerivative(2,em,[0.,0.])
 
-        
-        
         print "Input em is ", em
         print "Zeroth derivative is ",P0
         print "Analytic  first derivative is ", D1
@@ -453,7 +316,7 @@ if __name__=="__main__":
     p.clf()
     p.plot(x,biasp1)
     p.plot(x,biasp2)
-    p.savefig('bias.png')
+    p.savefig('bias'+fileappend+'.png')
         
     p.show()
 
