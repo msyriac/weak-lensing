@@ -136,7 +136,7 @@ def LikeSecondDer12(es1,es2):
     return exp(-dlta2/(2*sm2))*(2*em12*es1*es2*(-1 + es12 - es22) + es1*(2*em22*es2*(-1 - es12 + es22) + es2*(-1 + es12 + es22)*(-1 + es12 + es22 - 4*sm2) + em2*(-1 + 4*es22 + (es12 - 3*es22)*(es12 + es22 - 2*sm2))) + em1*(-(em2*(-1 + es14 - 6*es12*es22 + es24)) + es2*(-1 - 3*es14 + es24 - 2*es22*sm2 + es12*(4 - 2*es22 + 6*sm2))))/sm4
     
 
-
+'''
 def getDerivative (d,em,gg):
     #global gg_
     #gg_=gg
@@ -151,7 +151,7 @@ def getDerivative (d,em,gg):
         sder12=dblquad (IntegrandR12,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         sder22=dblquad (IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         return [sder11,sder12,sder22]
-
+'''
 
 
 
@@ -188,45 +188,48 @@ if __name__=="__main__":
     global sp2twice
     global tol
 
-    tol=1.49e-01
+    tol=1.49e-01 #integrator tolerance
 
+    # some global stuff to speed up function calls by integrator
     sp2twice=2*sig_pr**2
     sm2=sigma_e**2
     sm4=sm2**2
+    ##
     
-    appG=numpy.matrix([[0.01],[0.02]])
+    appG=[0.01,0.02]
 
     print "Applied shear is ",appG
     
-    A=ToyGenerator(appG.flat[0],appG.flat[1])
+    A=ToyGenerator(appG[0],appG[1])
     #eps=0.001
     random.seed(12296)#3)
 
     Cinv=numpy.zeros((2,2))
     Qsum=0
-    biasp1=[]
-    biasp2=[]
-    x=[]
+
 
     started=time.time()
     fileappend=str(started)
 
-    freq=50
+    
+    freq=10 # frequency of updates
+    n=10000 # number of galaxies
+
     tottime=0
     k=0
 
 
-    n=20000
 
     for i in range(n):
         
         em=A.generate()
+
+        #Stuff for global use to speed up function calls from integrator
         em1=em[0]
         em2=em[1]
-
         em12=em1**2
-
         em22=em2**2
+        ##
 
         
         P=(dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0])
@@ -241,8 +244,9 @@ if __name__=="__main__":
 
         Q_norm=(Q/P)
         Qsum+=Q_norm
-        Cinv+= Q_norm*(Q_norm.transpose())-(R/P)
+        Cinv+= ((Q_norm*(Q_norm.transpose()))-(R/P))
 
+        # Write updates to output#.log file
         if (((i+1) % freq)==0):
             now=time.time()
             elapsed=now-started
@@ -250,26 +254,32 @@ if __name__=="__main__":
             tottime+=elapsed
             k+=1
             avgtime=(tottime/k)/freq
-            print i+1, " out of ", n, " galaxies done."
+            #print i+1, " out of ", n, " galaxies done."
              
-            print "Average time for 1 galaxy is ", avgtime, " seconds."
+            #print "Average time for 1 galaxy is ", avgtime, " seconds."
 
             predict=(n-i-1)*avgtime
-            print "Predicted time of ", predict/60., " minutes left."
+            #print "Predicted time of ", predict/60., " minutes left."
             
             
-            x.append(i+1)
-            infG=numpy.linalg.inv(Cinv)*Qsum
-            bias=infG-appG
-            biasp1.append(bias.flat[0]*100/appG.flat[0])
-            biasp2.append(bias.flat[1]*100/appG.flat[1])
-            print infG
-            print biasp1[-1]
-            print biasp2[-1]
-            p.clf()
-            p.plot(x,biasp1)
-            p.plot(x,biasp2)
-            p.savefig('bias'+fileappend+'.png')
+            #x.append(i+1)
+            Cm=numpy.linalg.inv(Cinv)
+            infGp=(Cm*Qsum)
+            #print Cm
+            infG=[infGp.flat[0],infGp.flat[1]]
+            err=[sqrt(Cm[0,0]),sqrt(Cm[1,1])]
+            sigma = [(infG[0]-appG[0])/err[0],(infG[1]-appG[1])/err[1]]
+            bias=[infG[0]-appG[0],infG[1]-appG[1]]
+            biasp=[(bias[0]*100/appG[0]),(bias[1]*100/appG[1])]
+
+            with open("output"+fileappend+".log", "a") as myfile:
+                s= str((i+1, infG[0], err[0],  sigma[0],  biasp[0],infG[1], err[1],  sigma[1],  biasp[1], predict/60.)).strip('()')
+                myfile.write(s+'\n')
+            
+            #p.clf()
+            #p.plot(x,biasp1)
+            #p.plot(x,biasp2)
+            #p.savefig('bias'+fileappend+'.png')
 
         '''
         #Code to check correctness of analytical derivatives
@@ -310,25 +320,3 @@ if __name__=="__main__":
         '''
 
         
-    print infG
-    print biasp1[-1]
-    print biasp2[-1]
-    p.clf()
-    p.plot(x,biasp1)
-    p.plot(x,biasp2)
-    p.savefig('bias'+fileappend+'.png')
-        
-    p.show()
-
-
-    
-    
-
-
-
-        
-
-
-
-
-
