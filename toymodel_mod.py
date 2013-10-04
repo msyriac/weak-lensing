@@ -9,6 +9,7 @@ import matplotlib
 matplotlib.use('Agg')
 import pylab, math,random, sys, time
 import matplotlib.pyplot as p
+import csv
 
 sig_pr=0.3
 sigma_e=0.05
@@ -17,7 +18,7 @@ sigma_e=0.05
 def shear (e,g):
     ee=e[0]+1j*e[1]
     gg=g[0]+1j*g[1]
-    sh = (ee-gg)/(1-conjugate(gg)*ee)
+    sh = (ee-gg)/(1.-conjugate(gg)*ee)
     return [sh.real,sh.imag]
 
 
@@ -25,10 +26,10 @@ def shear (e,g):
 #Return prior as a function of |es|
 def Eprior(e2):
     e=math.sqrt(e2)
-    return e*((1-e2)**2)*exp(-e2/(sp2twice))
+    return e*((1-e2)**2.)*exp(-e2/(sp2twice))
 
 def fEprior(es0,es1):
-    return Eprior((es0**2+es1**2))
+    return Eprior((es0**2.+es1**2.))
 
 class ToyGenerator:
     def __init__ (self, g1, g2):
@@ -57,7 +58,7 @@ class ToyGenerator:
 
     def generate (self):
         E=self.generateE();
-        theta=random.uniform(0,2*math.pi);
+        theta=random.uniform(0,2.*math.pi);
         e1=E*cos(theta)
         e2=E*sin(theta)
         #print e1,e2
@@ -72,8 +73,8 @@ class ToyGenerator:
             e1m=e1+random.gauss(0,sigma_e)
             e2m=e2+random.gauss(0,sigma_e)
         
-            ee=sqrt(e1**2+e2**2)
-            if (ee<1): ## requier they fall onto <1
+            ee=sqrt(e1**2.+e2**2.)
+            if (ee<1.): ## requier they fall onto <1
                 ok=True
             else:
                 print "Retrying em"
@@ -82,64 +83,70 @@ class ToyGenerator:
         
 
 
+#def PriorFirstDer1(es1,es2):
+    #-(es1*(-1 + es1**2 + es2**2)**2*(es1**4 + es2**4 + sp**2 + es1**2*(-1 + 2*es2**2 - 5*sp**2) - es2**2*(1 + 5*sp**2)))s
+
+    #def PriorFirstDer2(es1,es2):
+    
 def LikeZeroDer(es1,es2):
     eo=[es1,es2]
-    dlta2=(em1-eo[0])**2+(em2-eo[1])**2
-    return exp(-dlta2/(2*sm2))
+    #eo=shear([es1,es2],gg_)
+    dlta2=(em1-eo[0])**2.+(em2-eo[1])**2.
+    return exp(-dlta2/(2.*sm2))
 
 
 
 
 def LikeFirstDer1(es1,es2):
 
-    dlta2=(em1-es1)**2+(em2-es2)**2
-    es12=es1**2
+    dlta2=(em1-es1)**2.+(em2-es2)**2.
+    es12=es1**2.
 
-    es22=es2**2
+    es22=es2**2.
 
-    return exp(-dlta2/(2*sm2))*(-em1+em1*es12+es1-es12*es1+2*em2*es1*es2-em1*es22-es1*es22)/sm2
+    return exp(-dlta2/(2.*sm2))*(-em1+em1*es12+es1-es12*es1+2.*em2*es1*es2-em1*es22-es1*es22)/sm2
 
 def LikeFirstDer2(es1,es2):
 
-    dlta2=(em1-es1)**2+(em2-es2)**2
-    es12=es1**2
-    es22=es2**2
-    return exp(-dlta2/(2*sm2))*(-em2+em2*es22+es2-es22*es2+2*em1*es2*es1-em2*es12-es2*es12)/sm2
+    dlta2=(em1-es1)**2.+(em2-es2)**2.
+    es12=es1**2.
+    es22=es2**2.
+    return exp(-dlta2/(2.*sm2))*(-em2+em2*es22+es2-es22*es2+2.*em1*es2*es1-em2*es12-es2*es12)/sm2
 
 def LikeSecondDer11(es1,es2):
 
-    dlta2=(em1-es1)**2+(em2-es2)**2
-    es12=es1**2
-    es22=es2**2
-    return exp(-dlta2/(2*sm2))*(((em1 - es1)*(-1 + es12) + 2*em2*es1*es2 - (em1 + es1)*es22)**2 + (2*em1*es1*(-1 + es12 - 3*es22) - (-1 + 3*es12 - es22)*(-1 + es12 - 2*em2*es2 + es22))*sm2)/sm4
+    dlta2=(em1-es1)**2.+(em2-es2)**2.
+    es12=es1**2.
+    es22=es2**2.
+    return exp(-dlta2/(2.*sm2))*(((em1 - es1)*(-1. + es12) + 2.*em2*es1*es2 - (em1 + es1)*es22)**2. + (2.*em1*es1*(-1. + es12 - 3.*es22) - (-1. + 3.*es12 - es22)*(-1. + es12 - 2.*em2*es2 + es22))*sm2)/sm4
     
 
 def LikeSecondDer22(es1,es2):
 
 
-    dlta2=(em1-es1)**2+(em2-es2)**2
-    es12=es1**2
-    es14=es12**2
+    dlta2=(em1-es1)**2.+(em2-es2)**2.
+    es12=es1**2.
+    es14=es12**2.
 
-    es22=es2**2
-    return exp(-dlta2/(2*sm2))*((em2*(1 + es12 - es22) + es2*(-1 - 2*em1*es1 + es12 + es22))**2 + (es14 - 2*es12*es2*(3*em2 + es2) + (1 + 2*em2*es2 - 3*es22)*(-1 + es22) - 2*em1*(es1 + es12*es1 - 3*es1*es22))*sm2)/sm4
+    es22=es2**2.
+    return exp(-dlta2/(2.*sm2))*((em2*(1. + es12 - es22) + es2*(-1. - 2.*em1*es1 + es12 + es22))**2. + (es14 - 2.*es12*es2*(3.*em2 + es2) + (1. + 2.*em2*es2 - 3.*es22)*(-1. + es22) - 2.*em1*(es1 + es12*es1 - 3.*es1*es22))*sm2)/sm4
 
 
 def LikeSecondDer12(es1,es2):
-    dlta2=(em1-es1)**2+(em2-es2)**2
-    es12=es1**2
-    es14=es12**2
+    dlta2=(em1-es1)**2.+(em2-es2)**2.
+    es12=es1**2.
+    es14=es12**2.
 
-    es22=es2**2
-    es24=es22**2
+    es22=es2**2.
+    es24=es22**2.
 
-    return exp(-dlta2/(2*sm2))*(2*em12*es1*es2*(-1 + es12 - es22) + es1*(2*em22*es2*(-1 - es12 + es22) + es2*(-1 + es12 + es22)*(-1 + es12 + es22 - 4*sm2) + em2*(-1 + 4*es22 + (es12 - 3*es22)*(es12 + es22 - 2*sm2))) + em1*(-(em2*(-1 + es14 - 6*es12*es22 + es24)) + es2*(-1 - 3*es14 + es24 - 2*es22*sm2 + es12*(4 - 2*es22 + 6*sm2))))/sm4
+    return exp(-dlta2/(2.*sm2))*(2.*em12*es1*es2*(-1. + es12 - es22) + es1*(2.*em22*es2*(-1. - es12 + es22) + es2*(-1. + es12 + es22)*(-1. + es12 + es22 - 4.*sm2) + em2*(-1. + 4.*es22 + (es12 - 3.*es22)*(es12 + es22 - 2.*sm2))) + em1*(-(em2*(-1. + es14 - 6.*es12*es22 + es24)) + es2*(-1 - 3.*es14 + es24 - 2.*es22*sm2 + es12*(4. - 2.*es22 + 6.*sm2))))/sm4
     
 
 '''
 def getDerivative (d,em,gg):
-    #global gg_
-    #gg_=gg
+    global gg_
+    gg_=gg
     if d==0:
         return dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
     if d==1:
@@ -176,34 +183,25 @@ def IntegrandR22(es0,es1):
 
 
 if __name__=="__main__":
-    global em1
-    global em2
+    global em1, em2, sm2, sm4, em12, em22, sp2twice, tol
 
-    global sm2
-    global sm4
-
-    global em12
-    global em22
-
-    global sp2twice
-    global tol
-
-    tol=1.49e-01 #integrator tolerance
+    tol=1.49e-03 #integrator tolerance
 
     # some global stuff to speed up function calls by integrator
-    sp2twice=2*sig_pr**2
-    sm2=sigma_e**2
-    sm4=sm2**2
+    sp2twice=2*sig_pr**2.
+    sm2=sigma_e**2.
+    sm4=sm2**2.
     ##
     
-    appG=[0.01,0.02]
+    appG=[-0.01,0.02]
 
     print "Applied shear is ",appG
     
     A=ToyGenerator(appG[0],appG[1])
-    #eps=0.001
-    random.seed(12296)#3)
-
+    eps=0.001
+    #random.seed(12296)#3)
+    random.seed(time.time())
+    
     Cinv=numpy.zeros((2,2))
     Qsum=0
 
@@ -212,26 +210,28 @@ if __name__=="__main__":
     fileappend=str(started)
 
     
-    freq=10 # frequency of updates
-    n=10000 # number of galaxies
+    freq=5 # frequency of updates
+    n=50 # number of galaxies
 
     tottime=0
     k=0
 
 
+    f = open('data/'+fileappend+'.csv', 'w')
+    #writer = csv.writer(f,delimiter=' ')
 
     for i in range(n):
         
         em=A.generate()
-
+        
         #Stuff for global use to speed up function calls from integrator
         em1=em[0]
         em2=em[1]
-        em12=em1**2
-        em22=em2**2
+        em12=em1**2.
+        em22=em2**2.
         ##
 
-        
+        '''
         P=(dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0])
         Q=(numpy.matrix( [ [dblquad (IntegrandQ1,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]],
                             [dblquad (IntegrandQ2,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]]
@@ -244,8 +244,22 @@ if __name__=="__main__":
 
         Q_norm=(Q/P)
         Qsum+=Q_norm
-        Cinv+= ((Q_norm*(Q_norm.transpose()))-(R/P))
+        Cinv+=((numpy.dot(Q_norm,(Q_norm.transpose())))-(R/P))
+        '''
 
+        P=dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
+        Q1=dblquad (IntegrandQ1,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
+        Q2=dblquad (IntegrandQ2,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
+        R11=dblquad (IntegrandR11,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
+        R12=dblquad (IntegrandR12,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
+        R22=dblquad (IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
+
+        
+        #numpy.savetxt(f,numpy.array([P,Q1,Q2,R11,R12,R22]),delimiter=" ")
+        #writer.writerow([P,Q1,Q2,R11,R12,R22])
+        row=[P,Q1,Q2,R11,R12,R22]
+        f.write(','.join(str(j) for j in row) + '\n')
+        '''
         # Write updates to output#.log file
         if (((i+1) % freq)==0):
             now=time.time()
@@ -264,7 +278,7 @@ if __name__=="__main__":
             
             #x.append(i+1)
             Cm=numpy.linalg.inv(Cinv)
-            infGp=(Cm*Qsum)
+            infGp=numpy.dot(Cm,Qsum)
             #print Cm
             infG=[infGp.flat[0],infGp.flat[1]]
             err=[sqrt(Cm[0,0]),sqrt(Cm[1,1])]
@@ -280,6 +294,7 @@ if __name__=="__main__":
             #p.plot(x,biasp1)
             #p.plot(x,biasp2)
             #p.savefig('bias'+fileappend+'.png')
+        '''
 
         '''
         #Code to check correctness of analytical derivatives
@@ -309,6 +324,7 @@ if __name__=="__main__":
         D1=getDerivative(1,em,[0.,0.])
         D2=getDerivative(2,em,[0.,0.])
 
+
         print "Input em is ", em
         print "Zeroth derivative is ",P0
         print "Analytic  first derivative is ", D1
@@ -319,4 +335,5 @@ if __name__=="__main__":
         print "Percentage difference is ",[(D2N11-D2[0])*100/D2[0], (D2N12-D2[1])*100/D2[1], (D2N22-D2[2])*100/D2[2]], "%"
         '''
 
-        
+    print "Average time = ", (time.time()-started)/n, " seconds."
+    f.close()
