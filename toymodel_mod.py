@@ -7,12 +7,10 @@ import cmath
 import numpy
 import matplotlib
 matplotlib.use('Agg')
-import pylab, math,random, sys, time
+import pylab, math,random, sys, time, getopt
 import matplotlib.pyplot as p
 import csv
 
-sig_pr=0.3
-sigma_e=0.05
 
 #Shear e with g to return eo1 and eo2
 def shear (e,g):
@@ -182,10 +180,51 @@ def IntegrandR22(es0,es1):
     return fEprior(es0,es1)*LikeSecondDer22(es0,es1)
 
 
-if __name__=="__main__":
-    global em1, em2, sm2, sm4, em12, em22, sp2twice, tol
+def main(argv):
 
-    tol=1.49e-03 #integrator tolerance
+    n=50
+    tollr=1.49e-03
+    gg1=-0.01
+    gg2=0.02
+    sige=0.05
+    sigp=0.3
+    i=1
+    
+    try:
+        opts, args = getopt.getopt(argv,"n:1:2:e:s:t:i:")
+    except getopt.GetoptError:
+        print "I don't understand the arguments you passed. Run with -h to see available options."
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'python toymodel_mod.py -n <number of galaxies> -1 <shear component 1> -2 <shear component 2> -e <sigma_e> -s <sigma_pr> -t <integrator tolerance> -i <file index>'
+            sys.exit()
+        elif opt == "-n":
+            n=int(arg)
+        elif opt == "-1":
+            gg1=float(arg)
+        elif opt == "-2":
+            gg2=float(arg)
+        elif opt == "-e":
+            sige=float(arg)
+        elif opt == "-s":
+            sigp=float(arg)
+        elif opt == "-t":
+            tollr=float(arg)
+        elif opt == "-i":
+            ind=int(arg)
+
+    makeDerivs(n,gg1,gg2,sige,sigp,tollr,ind)
+
+
+def makeDerivs(n,gg1,gg2,sige,sigp,tollr,ind):
+    global em1, em2, sm2, sm4, em12, em22, sp2twice, tol,sig_pr, sigma_e
+
+    sig_pr=sigp
+    sigma_e=sige #0.05
+
+
+    tol=tollr #1.49e-03 #integrator tolerance
 
     # some global stuff to speed up function calls by integrator
     sp2twice=2*sig_pr**2.
@@ -193,7 +232,7 @@ if __name__=="__main__":
     sm4=sm2**2.
     ##
     
-    appG=[-0.01,0.02]
+    appG=[gg1,gg2]#[-0.01,0.02]
 
     print "Applied shear is ",appG
     
@@ -209,16 +248,14 @@ if __name__=="__main__":
     started=time.time()
     fileappend=str(started)
 
-    
-    freq=5 # frequency of updates
-    n=50 # number of galaxies
 
     tottime=0
     k=0
 
 
-    f = open('data/'+fileappend+'.csv', 'w')
+    f = open('data/'+fileappend+'i'+str(ind)+'.csv', 'w')
     #writer = csv.writer(f,delimiter=' ')
+
 
     for i in range(n):
         
@@ -231,21 +268,6 @@ if __name__=="__main__":
         em22=em2**2.
         ##
 
-        '''
-        P=(dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0])
-        Q=(numpy.matrix( [ [dblquad (IntegrandQ1,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]],
-                            [dblquad (IntegrandQ2,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]]
-                            ] ))
-        Rcross=dblquad (IntegrandR12,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
-        
-        R=(numpy.matrix( [ [dblquad (IntegrandR11,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0], Rcross],
-                             [Rcross, dblquad (IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]] ]))
-
-
-        Q_norm=(Q/P)
-        Qsum+=Q_norm
-        Cinv+=((numpy.dot(Q_norm,(Q_norm.transpose())))-(R/P))
-        '''
 
         P=dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
         Q1=dblquad (IntegrandQ1,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
@@ -255,46 +277,9 @@ if __name__=="__main__":
         R22=dblquad (IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
 
         
-        #numpy.savetxt(f,numpy.array([P,Q1,Q2,R11,R12,R22]),delimiter=" ")
         #writer.writerow([P,Q1,Q2,R11,R12,R22])
         row=[P,Q1,Q2,R11,R12,R22]
         f.write(','.join(str(j) for j in row) + '\n')
-        '''
-        # Write updates to output#.log file
-        if (((i+1) % freq)==0):
-            now=time.time()
-            elapsed=now-started
-            started=now
-            tottime+=elapsed
-            k+=1
-            avgtime=(tottime/k)/freq
-            #print i+1, " out of ", n, " galaxies done."
-             
-            #print "Average time for 1 galaxy is ", avgtime, " seconds."
-
-            predict=(n-i-1)*avgtime
-            #print "Predicted time of ", predict/60., " minutes left."
-            
-            
-            #x.append(i+1)
-            Cm=numpy.linalg.inv(Cinv)
-            infGp=numpy.dot(Cm,Qsum)
-            #print Cm
-            infG=[infGp.flat[0],infGp.flat[1]]
-            err=[sqrt(Cm[0,0]),sqrt(Cm[1,1])]
-            sigma = [(infG[0]-appG[0])/err[0],(infG[1]-appG[1])/err[1]]
-            bias=[infG[0]-appG[0],infG[1]-appG[1]]
-            biasp=[(bias[0]*100/appG[0]),(bias[1]*100/appG[1])]
-
-            with open("output"+fileappend+".log", "a") as myfile:
-                s= str((i+1, infG[0], err[0],  sigma[0],  biasp[0],infG[1], err[1],  sigma[1],  biasp[1], predict/60.)).strip('()')
-                myfile.write(s+'\n')
-            
-            #p.clf()
-            #p.plot(x,biasp1)
-            #p.plot(x,biasp2)
-            #p.savefig('bias'+fileappend+'.png')
-        '''
 
         '''
         #Code to check correctness of analytical derivatives
@@ -335,5 +320,9 @@ if __name__=="__main__":
         print "Percentage difference is ",[(D2N11-D2[0])*100/D2[0], (D2N12-D2[1])*100/D2[1], (D2N22-D2[2])*100/D2[2]], "%"
         '''
 
-    print "Average time = ", (time.time()-started)/n, " seconds."
+    #print "Average time = ", (time.time()-started)/n, " seconds."
     f.close()
+
+
+if __name__=="__main__":
+    main(sys.argv[1:])
