@@ -22,12 +22,16 @@ def shear (e,g):
 
     
 #Return prior as a function of |es|
-def Eprior(e2):
-    e=math.sqrt(e2)
-    return e*((1-e2)**2.)*exp(-e2/(sp2twice))
+def Eprior(e):
+    #e=math.sqrt(e2)
+    return e*((1-e**2)**2.)*exp(-e**2/(sp2twice))
+#exp(-e2/sp2twice) 
 
-def fEprior(es0,es1):
-    return Eprior((es0**2.+es1**2.))
+def fEprior(es1,es2):
+    eo=[es1,es2]
+    #eo=shear([es1,es2],gg_)
+    
+    return Eprior(sqrt(eo[0]**2.+eo[1]**2.))
 
 class ToyGenerator:
     def __init__ (self, g1, g2):
@@ -81,10 +85,36 @@ class ToyGenerator:
         
 
 
-#def PriorFirstDer1(es1,es2):
-    #-(es1*(-1 + es1**2 + es2**2)**2*(es1**4 + es2**4 + sp**2 + es1**2*(-1 + 2*es2**2 - 5*sp**2) - es2**2*(1 + 5*sp**2)))s
+def PriorFirstDer1(es1,es2):
+    es12=es1**2
+    es22=es2**2
+    dlta2=es12+es22
+    
+    return (-(es1*(-1 + es12 + es22)**2*(es12**2 + es22**2 + sp2 + es12*(-1 + 2*es22 - 5*sp2) - es22*(1 + 5*sp2))))*exp(-dlta2/(sp2twice))/(sqrt(dlta2)*sp2)
 
-    #def PriorFirstDer2(es1,es2):
+def PriorFirstDer2(es1,es2):
+    es12=es1**2
+    es22=es2**2
+    dlta2=es12+es22
+
+    return (-(es2*(-1 + es12 + es22)**2*(es12**2 + es22**2 + sp2 + es12*(-1 + 2*es22 - 5*sp2) - es22*(1 + 5*sp2))))*exp(-dlta2/(sp2twice))/(sqrt(dlta2)*sp2)
+
+def PriorSecondDer11(es1,es2):
+    es12=es1**2
+    es22=es2**2
+    dlta2=es12+es22
+        
+    return (es1**10 + es1**8*(-2 + 4*es22 - 13*sp2) + es22*(1 + es22)*sp2*(es2**4 + sp2 - es22*(1 + 5*sp2)) + es1**6*(1 + 6*es2**4 + 16*sp2 + 30*sp4 - 2*es22*(3 + 19*sp2)) + es12*es22*(es2**6 - 2*es2**4*(1 + 5*sp2) - 2*sp2*(2 + 9*sp2) + es22*(1 + 16*sp2 + 20*sp4)) + es1**4*(4*es2**6 - 6*es2**4*(1 + 6*sp2) - sp2*(3 + 14*sp2) + es22*(2 + 32*sp2 + 55*sp4)))*exp(-dlta2/(sp2twice))/(((es12 + es22)**1.5*sp4)/(-1 + es12 + es22)**2)
+
+def PriorSecondDer22(es1, es2):
+    dlta2=es1**2+es2**2
+
+    return (es1**8*(es2**2 + sp2) + es1**6*(4*es2**4 - 5*sp**4 - 2*es2**2*(1 + 5*sp2)) + es1**4*(6*es2**6 - sp2*(1 + 4*sp2) - 6*es2**4*(1 + 6*sp2) + es2**2*(1 + 16*sp2 + 20*sp**4)) + es2**4*(es2**6 - es2**4*(2 + 13*sp2) - sp2*(3 + 14*sp2) + es2**2*(1 + 16*sp2 + 30*sp**4)) + es1**2*(4*es2**8 + sp**4 - 2*es2**2*sp2*(2 + 9*sp2) - 2*es2**6*(3 + 19*sp2) + es2**4*(2 + 32*sp2 + 55*sp**4)))*exp(-dlta2/(2*sp2))/(((es1**2 + es2**2)**1.5*sp**4)/(-1 + es1**2 + es2**2)**2)
+
+def PriorSecondDer12(es1,es2):
+    dlta2=es1**2+es2**2
+
+    return (es1*es2*(es1**8 + es2**8 - sp**4 + 2*es1**6*(-1 + 2*es2**2 - 7*sp2) - 2*es2**6*(1 + 7*sp2) - 2*es2**2*(sp2 + 5*sp**4) + es2**4*(1 + 16*sp2 + 35*sp**4) + es1**4*(1 + 6*es2**4 + 16*sp2 + 35*sp**4 - 6*es2**2*(1 + 7*sp2)) + 2*es1**2*(2*es2**6 - sp2*(1 + 5*sp2) - 3*es2**4*(1 + 7*sp2) + es2**2*(1 + 16*sp2 + 35*sp**4))))*exp(-dlta2/(2*sp2))/(((es1**2 + es2**2)**1.5*sp**4)/(-1 + es1**2 + es2**2)**2)
     
 def LikeZeroDer(es1,es2):
     eo=[es1,es2]
@@ -141,10 +171,32 @@ def LikeSecondDer12(es1,es2):
     return exp(-dlta2/(2.*sm2))*(2.*em12*es1*es2*(-1. + es12 - es22) + es1*(2.*em22*es2*(-1. - es12 + es22) + es2*(-1. + es12 + es22)*(-1. + es12 + es22 - 4.*sm2) + em2*(-1. + 4.*es22 + (es12 - 3.*es22)*(es12 + es22 - 2.*sm2))) + em1*(-(em2*(-1. + es14 - 6.*es12*es22 + es24)) + es2*(-1 - 3.*es14 + es24 - 2.*es22*sm2 + es12*(4. - 2.*es22 + 6.*sm2))))/sm4
     
 
-'''
+def Gaussn(es1,es2):
+    return exp((-es1**2-es2**2)/(2*sp**2))
+
+def dGaussn1(es1,es2):
+    return exp((-es1**2-es2**2)/(2*sp**2))*(-es1/sp**2)
+
+
+def dGaussn2(es1,es2):
+    return exp((-es1**2-es2**2)/(2*sp**2))*(-es2/sp**2)
+
+
+def dGaussn11(es1,es2):
+    return exp((-es1**2-es2**2)/(2*sp**2))*((-sp**2 + es1**2)/sp**4)
+
+def dGaussn22(es1,es2):
+    return exp((-es1**2-es2**2)/(2*sp**2))*((-sp**2 + es2**2)/sp**4)
+
+
+def dGaussn12(es1,es2):
+    return exp((-es1**2-es2**2)/(2*sp**2))*((es1*es2)/sp**4)
+
+
 def getDerivative (d,em,gg):
     global gg_
     gg_=gg
+    '''
     if d==0:
         return dblquad (IntegrandP,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
     if d==1:
@@ -155,8 +207,19 @@ def getDerivative (d,em,gg):
         sder11=dblquad (IntegrandR11,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         sder12=dblquad (IntegrandR12,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         sder22=dblquad (IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
+    '''
+    if d==0:
+        return dblquad (fEprior,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
+    if d==1:
+        fder1=dblquad (PriorFirstDer1,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
+        fder2=dblquad (PriorFirstDer2,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
+        return [fder1,fder2]
+    if d==2:
+        sder11=dblquad (PriorSecondDer11,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
+        sder12=dblquad (PriorSecondDer12,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
+        sder22=dblquad (PriorSecondDer22,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=tol, epsrel=tol)[0]
         return [sder11,sder12,sder22]
-'''
+
 
 
 
@@ -182,13 +245,13 @@ def IntegrandR22(es0,es1):
 
 def main(argv):
 
-    n=50
-    tollr=1.49e-03
+    n=3
+    tollr=1.49e-06
     gg1=-0.01
     gg2=0.02
-    sige=0.05
+    sige=0.05#0.05
     sigp=0.3
-    i=1
+    ind=1
     
     try:
         opts, args = getopt.getopt(argv,"n:1:2:e:s:t:i:")
@@ -218,7 +281,7 @@ def main(argv):
 
 
 def makeDerivs(n,gg1,gg2,sige,sigp,tollr,ind):
-    global em1, em2, sm2, sm4, em12, em22, sp2twice, tol,sig_pr, sigma_e
+    global em1, em2, sm2, sm4, em12, em22, sp2twice, tol,sig_pr, sigma_e,sp2,sp,sp4
 
     sig_pr=sigp
     sigma_e=sige #0.05
@@ -227,6 +290,9 @@ def makeDerivs(n,gg1,gg2,sige,sigp,tollr,ind):
     tol=tollr #1.49e-03 #integrator tolerance
 
     # some global stuff to speed up function calls by integrator
+    sp=sigp
+    sp2=sigp**2
+    sp4=sp2**2
     sp2twice=2*sig_pr**2.
     sm2=sigma_e**2.
     sm4=sm2**2.
@@ -239,7 +305,7 @@ def makeDerivs(n,gg1,gg2,sige,sigp,tollr,ind):
     A=ToyGenerator(appG[0],appG[1])
     eps=0.001
     #random.seed(12296)#3)
-    random.seed(time.time())
+    random.seed(time.time()*ind) ######
     
     Cinv=numpy.zeros((2,2))
     Qsum=0
@@ -275,7 +341,13 @@ def makeDerivs(n,gg1,gg2,sige,sigp,tollr,ind):
         R11=dblquad (IntegrandR11,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
         R12=dblquad (IntegrandR12,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
         R22=dblquad (IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
-
+        
+        #P=Gaussn(em1,em2)
+        #Q1=dGaussn1(em1,em2) 
+        #Q2=dGaussn2(em1,em2) 
+        #R11=dGaussn11(em1,em2) 
+        #R12=dGaussn12(em1,em2) 
+        #R22=dGaussn22(em1,em2) 
         
         #writer.writerow([P,Q1,Q2,R11,R12,R22])
         row=[P,Q1,Q2,R11,R12,R22]
@@ -320,7 +392,7 @@ def makeDerivs(n,gg1,gg2,sige,sigp,tollr,ind):
         print "Percentage difference is ",[(D2N11-D2[0])*100/D2[0], (D2N12-D2[1])*100/D2[1], (D2N22-D2[2])*100/D2[2]], "%"
         '''
 
-    #print "Average time = ", (time.time()-started)/n, " seconds."
+    print "Average time = ", (time.time()-started)/n, " seconds."
     f.close()
 
 
