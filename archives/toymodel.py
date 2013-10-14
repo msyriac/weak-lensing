@@ -1,0 +1,239 @@
+#!/usr/bin/env python
+from scipy import *
+from  scipy.integrate import quad
+from scipy.integrate import dblquad 
+from scipy.interpolate import InterpolatedUnivariateSpline
+import pylab, math,random
+import cmath
+
+sig_pr=0.3
+sigma_e=0.05
+
+def shear (e,g):
+    ee=e[0]+1j*e[1]
+    gg=g[0]+1j*g[1]
+    sh = (ee-gg)/(1-conjugate(gg)*ee)
+    return [sh.real,sh.imag]
+
+
+    
+
+def Eprior(e):
+    return e*(1-e*e)**2*exp(-e**2/(2*sig_pr**2))
+
+
+class ToyGenerator:
+    def __init__ (self, g1, g2): # Changed sig_i to sig_pr
+        self.g1=g1
+        self.g2=g2
+        
+        ## generate lookup table so that we can sample from 
+        ## prob given in eq 18 of Bernstein and Armstrong:
+
+        x=linspace(0,1.0,100)
+        #y=array([quad(lambda x:x*(1-x*x)**x*exp(-x**2/(2*0.3**2)),0,a)[0] for a in x]) # Typo? Should be x^2 not x^x, also changed 0.3 to sig_pr -Mat
+        y=array([quad(Eprior,0,emax)[0] for emax in x])
+        y/=y[-1]
+        #print x
+        #print y
+
+
+        self.genI=InterpolatedUnivariateSpline(y,x) # This is to invert the CDF right? Just making sure. - Mat
+        #print self.genI
+        #xx=arange(0,1,0.0001)
+        #pylab.plot(y,x,'ro')
+        #pylab.plot(xx,map(self.genI,xx),'r-')
+        #pylab.show()
+
+
+    def generateE(self):
+        return self.genI(random.uniform(0.,1.0))
+
+
+    def generate (self):
+        E=self.generateE();
+        theta=random.uniform(0,2*math.pi);
+        e1=E*cos(theta)
+        e2=E*sin(theta)
+
+        ##intrinsic ellipticty now shear
+        ### MAT CHECK THE SHIT BELOW # Corrected to agree with Seitz and Schneider 1997 Eq 3.2 -Mat
+        # This is cut off at second order. Try using full expression if encountering problems later.
+
+        
+
+        e1,e2=shear([e1,e2],[self.g1,self.g2])
+        
+        ### now add error
+        ok=False
+        while not ok:
+
+            e1m=e1+random.gauss(0,sigma_e)
+            e2m=e2+random.gauss(0,sigma_e)
+        
+            ee=sqrt(e1m**2+e2m**2) # Changed from e1 to e1m - Mat
+            if (ee<1): ## requier they fall onto <1
+                ok=True
+            
+        return e1m,e2m
+        
+
+
+def zeroDer(es0,es1):
+    es=sqrt(es0**2+es1**2)
+    eo=shear([es0,es1],gg_)
+    dlta=sqrt((em_[0]-eo[0])**2+(em_[1]-eo[1])**2)
+    #print es0, es1
+    #print em_[0], em_[1], eo[0], eo[1]
+    #print sigma_e**2
+    #print dlta**2
+    return Eprior(es)*exp(-dlta*dlta/(2*sigma_e**2))
+
+
+
+
+def firstDer1(es0,es1):
+    es=sqrt(es0**2+es1**2)
+    eo=[es0,es1] #expanding around g=0
+    dlta=sqrt((em_[0]-eo[0])**2+(em_[1]-eo[1])**2)
+    #Gprime= exp(-dlta*dlta/(2*sigma_e**2))*(-1.*dlta/sigma_e**2)
+
+    #den = dlta
+    #top = -1*(es0**3+em_[0]-es0**2*em_[0]+es1**2*em_[0]+es0*(-1+es1**2-2*es1*em_[1]))
+    #return Eprior(es)*Gprime*top/den
+    #####
+    em1=em_[0]
+    em2=em_[1]
+    es2=es1
+    es1=es0
+    return Eprior(es)*exp(-dlta*dlta/(2*sigma_e**2))*(-em1+em1*es1**2+es1-es1**3+2*em2*es1*es2-em1*es2**2-es1*es2**2)/sigma_e**2
+
+def firstDer2(es0,es1):
+    es=sqrt(es0**2+es1**2)
+    eo=[es0,es1] #expanding around g=0
+    dlta=sqrt((em_[0]-eo[0])**2+(em_[1]-eo[1])**2)
+    #Gprime= exp(-dlta*dlta/(2*sigma_e**2))*(-1.*dlta/sigma_e**2)
+
+    #den = dlta
+    #top = -1*(es1**3+em_[1]-es1**2*em_[1]+es0**2*em_[1]+es1*(-1+es0**2-2*es0*em_[0]))
+    #return Eprior(es)*Gprime*top/den
+    #####
+    em1=em_[0]
+    em2=em_[1]
+    es2=es1
+    es1=es0
+    return Eprior(es)*exp(-dlta*dlta/(2*sigma_e**2))*(-em2+em2*es2**2+es2-es2**3+2*em1*es2*es1-em2*es1**2-es2*es1**2)/sigma_e**2
+
+def secondDer11(es0,es1):
+    es=sqrt(es0**2+es1**2)
+    eo=[es0,es1] #expanding around g=0
+    dlta=sqrt((em_[0]-eo[0])**2+(em_[1]-eo[1])**2)
+
+    em1=em_[0]
+    em2=em_[1]
+    es2=es1
+    es1=es0
+    sm=sigma_e
+
+    return Eprior(es)*exp(-dlta*dlta/(2*sm**2))*(((em1 - es1)*(-1 + es1**2) + 2*em2*es1*es2 - (em1 + es1)*es2**2)**2 + (2*em1*es1*(-1 + es1**2 - 3*es2**2) - (-1 + 3*es1**2 - es2**2)*(-1 + es1**2 - 2*em2*es2 + es2**2))*sm**2)/sm**4
+    
+
+def secondDer22(es0,es1):
+    es=sqrt(es0**2+es1**2)
+    eo=[es0,es1] #expanding around g=0
+    dlta=sqrt((em_[0]-eo[0])**2+(em_[1]-eo[1])**2)
+
+    em1=em_[0]
+    em2=em_[1]
+    es2=es1
+    es1=es0
+
+    sm=sigma_e
+    return Eprior(es)*exp(-dlta*dlta/(2*sm**2))*((em2*(1 + es1**2 - es2**2) + es2*(-1 - 2*em1*es1 + es1**2 + es2**2))**2 + (es1**4 - 2*es1**2*es2*(3*em2 + es2) + (1 + 2*em2*es2 - 3*es2**2)*(-1 + es2**2) - 2*em1*(es1 + es1**3 - 3*es1*es2**2))*sm**2)/sm**4
+
+
+def secondDer12(es0,es1):
+    es=sqrt(es0**2+es1**2)
+    eo=[es0,es1] #expanding around g=0
+    dlta=sqrt((em_[0]-eo[0])**2+(em_[1]-eo[1])**2)
+
+    em1=em_[0]
+    em2=em_[1]
+    es2=es1
+    es1=es0
+
+    sm=sigma_e
+    return Eprior(es)*exp(-dlta*dlta/(2*sm**2))*(2*em1**2*es1*es2*(-1 + es1**2 - es2**2) + es1*(2*em2**2*es2*(-1 - es1**2 + es2**2) + es2*(-1 + es1**2 + es2**2)*(-1 + es1**2 + es2**2 - 4*sm**2) + em2*(-1 + 4*es2**2 + (es1**2 - 3*es2**2)*(es1**2 + es2**2 - 2*sm**2))) + em1*(-(em2*(-1 + es1**4 - 6*es1**2*es2**2 + es2**4)) + es2*(-1 - 3*es1**4 + es2**4 - 2*es2**2*sm**2 + es1**2*(4 - 2*es2**2 + 6*sm**2))))/sm**4
+    
+
+
+def getDerivative (d,em,gg):
+    global em_
+    global gg_
+    em_=em
+    gg_=gg
+    if d==0:
+        return dblquad (zeroDer,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=1.49e-02, epsrel=1.49e-02)[0]
+    if d==1:
+        fder1=dblquad (firstDer1,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=1.49e-02, epsrel=1.49e-02)[0]
+        fder2=dblquad (firstDer2,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=1.49e-02, epsrel=1.49e-02)[0]
+        return [fder1,fder2]
+    if d==2:
+        sder11=dblquad (secondDer11,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=1.49e-02, epsrel=1.49e-02)[0]
+        sder12=dblquad (secondDer12,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=1.49e-02, epsrel=1.49e-02)[0]
+        sder22=dblquad (secondDer22,-1.0, 1.0, lambda x:-sqrt(1-x*x), lambda x:sqrt(1-x*x),epsabs=1.49e-02, epsrel=1.49e-02)[0]
+        return [sder11,sder12,sder22]
+
+
+
+if __name__=="__main__":
+    A=ToyGenerator(0.01,0.02)
+    eps=0.001
+    random.seed(3)
+    n=1
+
+    #print zeroDer(0.1,-0.1)
+    #print gg_
+    for x in range(n):
+        em=A.generate()
+
+        #Zeroth derivative
+        P0=getDerivative(0,em,[0.,0.])
+
+
+        #Finite Differences
+        Forward1=getDerivative(0,em,[eps,0.])
+        Backward1=getDerivative(0,em,[-eps,0.])
+        Forward2=getDerivative(0,em,[0.0,eps])
+        Backward2=getDerivative(0,em,[0.0,-eps])
+        For1For2=getDerivative(0,em,[eps,eps])
+        Bak1Bak2=getDerivative(0,em,[-eps,-eps])
+
+        #Central finite difference for first derivative
+        D1N1=(Forward1-Backward1)/(2*eps)
+        D1N2=(Forward2-Backward2)/(2*eps)
+
+        #Central finite differences for second derivative
+        D2N11=(Forward1-2*P0+Backward1)/eps**2
+        D2N12=(For1For2-Forward1-Forward2+2*P0-Backward1-Backward2+Bak1Bak2)/(2*eps**2)
+        D2N22=(Forward2-2*P0+Backward2)/eps**2
+
+        #Analytical first and second derivatives
+        D1=getDerivative(1,em,[0.,0.])
+        D2=getDerivative(2,em,[0.,0.])
+
+        print "Input em is ", em
+        print "Zeroth derivative is ",P0
+        print "Analytic  first derivative is ", D1
+        print "Numerical first derivative is " ,[D1N1,D1N2]
+        print "Percentage difference is ",[(D1N1-D1[0])*100/D1[0], (D1N2-D1[1])*100/D1[1]], "%"
+        print "Analytic  second derivative is ", D2
+        print "Numerical second derivative is " ,[D2N11,D2N12,D2N22]
+        print "Percentage difference is ",[(D2N11-D2[0])*100/D2[0], (D2N12-D2[1])*100/D2[1], (D2N22-D2[2])*100/D2[2]], "%"
+
+        
+
+
+
+
+

@@ -24,7 +24,7 @@ class Pairs:
         self.cov[1,2]=sigmad2*cross12
         
         self.chol=la.cholesky(self.cov)
-        print self.cov
+        #print self.cov
 
 
     def draw (self):
