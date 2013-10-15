@@ -64,10 +64,11 @@ for fname in filesG:
 
 GHavg=GHsum/i
 for g in x:
-    Q+=(1/(i-1.)) * numpy.dot(g-GHavg,(g-GHavg).transpose())  
+    Q+=numpy.dot(g-GHavg,(g-GHavg).transpose())
+    Q/=(i-1.) 
 
 
-#print Q
+print Q
 
 
     
