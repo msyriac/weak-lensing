@@ -125,7 +125,14 @@ def main(argv):
 
     if doPairs:
         fH = open('data/'+"h"+fileappend+'i'+str(ind)+'.csv', 'w')
-        p=gen.Pairs()
+        #p=gen.Pairs()
+        #random.seed(started*ind)
+        #[gg1,gg2,hh1,hh2]=p.draw()
+        #[gg1,gg2,hh1,hh2]=[ 0.01017254,  0.02438026,  0.01457512, -0.00170212]
+        #[gg1,gg2,hh1,hh2]=[0.003,0.004,0.01,0.01]
+        #fini=open('data/gval.ini', 'w')
+        #fini.write(','.join(str(j) for j in [gg1,gg2,hh1,hh2]) + '\n')
+        #fini.close()
 
         for i in range(n):
             random.seed(started*ind+i)
