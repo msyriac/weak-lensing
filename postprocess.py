@@ -5,8 +5,9 @@ import csv
 import numpy
 from math import *
 import matplotlib.pyplot as p
+import scipy.linalg  as l
 
-files = glob.glob("data/*.csv")
+files = glob.glob("run_working_1/*.csv")
 
 Cinv=numpy.zeros((2,2))
 Qsum=0.
@@ -19,7 +20,10 @@ y2=[]
 i=0
 k=0
 
-freq=50
+freq=1000
+
+ped=numpy.zeros(2)
+pedsw=0
 
 for fname in files:
     f = open(fname, 'r')
@@ -40,7 +44,26 @@ for fname in files:
 
             Q_norm=(Q/P)
             Qsum+=Q_norm
-            Cinv+=((numpy.dot(Q_norm,Q_norm.transpose()))-(R/P))
+            CinvC=((numpy.dot(Q_norm,Q_norm.transpose()))-(R/P))
+            Cinv+=CinvC
+            if True:
+                detCinv=CinvC[0,0]*CinvC[1,1]-CinvC[0,1]**2
+                CC=l.inv(CinvC)
+                infGX=numpy.dot(CC,Q_norm.flat)
+                we=detCinv
+                ped+=infGX*we
+                pedsw+=we
+                
+                #we=abs(detCinv)
+                #if (detCinv>0):
+                #    ped+=infGX*we
+                #    pedsw+=we
+                ##else:
+                #    ped-=infGX*we
+                #    pedsw+=we
+            
+            
+
             if (i % freq)==0:
                 print i
                 Cm=numpy.linalg.inv(Cinv)
@@ -58,8 +81,13 @@ for fname in files:
 
 print i, " valid lines read."
 print k, " invalid lines skipped."
-print str((i, infG[0], err[0],  sigma[0],  biasp[0],infG[1], err[1],  sigma[1],  biasp[1])).strip('()')
+print i
+print infG[0], err[0],  sigma[0],  biasp[0]
+print infG[1], err[1],  sigma[1],  biasp[1]
 print Cm
+
+ped/=pedsw
+print ped
 
 if (freq!=i):
     p.clf()

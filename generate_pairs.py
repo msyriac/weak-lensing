@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+B85;95;0c#!/usr/bin/env python
 from scipy import *
 import scipy.linalg as la
 import random
@@ -42,13 +42,23 @@ class Pairs:
 #        cross22=0.05
 #
 
+#[[ 0.0004   0.       0.00028  0.00012]
+# [ 0.       0.0004   0.00012  0.00024]
+# [ 0.00028  0.00012  0.0004   0.     ]
+# [ 0.00012  0.00024  0.       0.0004 ]]
+#
+#        cross11=0.7
+#    cross12=0.3
+#    cross22=0.6
+#    sigmad2=sigmad**2
+# sigmad=0.02
 
 
 
 if __name__=="__main__":
     p=Pairs()
     print p.cov
-    #stop()
+    stop()
     sw=0
     sv=zeros(4)
     svv=zeros((4,4))

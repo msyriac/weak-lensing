@@ -10,8 +10,8 @@ from scipy import *
 
 #import generate_pairs as gen
 
-filesG = glob.glob("data/pairs_1/g*.csv")
-filesH = glob.glob("data/pairs_1/h*.csv")
+filesG = glob.glob("datan/g*.csv")
+filesH = glob.glob("datan/h*.csv")
 
 CinvG=numpy.zeros((2,2))
 CinvH=numpy.zeros((2,2))
@@ -92,13 +92,13 @@ for fname in filesG[:][:]:
         # E2H=TrH/2.0-sqrt(TrH**2/4-DH)
         # HpD=(E1H>0) and (E2H>0)
 
-        if (any(abs(infGp)>1)) or (any(abs(infHp)>1)):
+        if (any(abs(infGp)>1)) or (any(abs(infHp)>1)) or (DG<0) or (DH<0):
             continue
         
         
-        weG=abs(1/(DG))
+        weG=1/(DG)
         vecG=numpy.array(infGp.flat)
-        weH=abs(1/(DH))
+        weH=1/(DH)
         vecH=numpy.array(infHp.flat)
         x.append( (weG,vecG,weH,vecH) )
         
@@ -134,7 +134,7 @@ for j in range(Nch):
 S/=Nch
 SS/=Nch
 SS-=S*S
-
+print '--------'
 print S
 print sqrt(SS)/sqrt(Nch)
 
