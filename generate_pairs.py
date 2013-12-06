@@ -5,9 +5,9 @@ import random
 
 class Pairs:
     def __init__(self, sigmad=0.02):
-        cross11=0.1
-        cross12=0.2
-        cross22=0.05
+        cross11=0.7
+        cross12=0.3
+        cross22=0.6
         sigmad2=sigmad**2
         self.cov = zeros((4,4))
         for i  in range(4):
@@ -32,9 +32,23 @@ class Pairs:
         return dot(rv,self.chol)
 
 
+#[[  4.00000000e-04   0.00000000e+00   4.00000000e-05   8.00000000e-05]
+# [  0.00000000e+00   4.00000000e-04   8.00000000e-05   2.00000000e-05]
+# [  4.00000000e-05   8.00000000e-05   4.00000000e-04   0.00000000e+00]
+# [  8.00000000e-05   2.00000000e-05   0.00000000e+00   4.00000000e-04]]
+#
+# for        cross11=0.1
+#        cross12=0.2
+#        cross22=0.05
+#
+
+
+
 
 if __name__=="__main__":
     p=Pairs()
+    print p.cov
+    #stop()
     sw=0
     sv=zeros(4)
     svv=zeros((4,4))
