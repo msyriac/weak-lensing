@@ -13,20 +13,24 @@ def LnLikelihood(Qlist,Nlist,C):
     LnLsum=0
     for Q,N in zip(Qlist,Nlist):
         Ninv=numpy.linalg.inv(N)
-        F=-0.5*numpy.dot(Ninv,C).trace()
-        S=0.25*numpy.dot(numpy.dot(numpy.dot(Ninv,C),Ninv),C).trace()
-        T=0.5*numpy.dot(numpy.dot(Q,C),Q.transpose()) #check order!
-        LnL=  F + S + T
+        NinvC=numpy.dot(Ninv,C)
+        F=-0.5*NinvC.trace()
+        S=0.25*numpy.dot(NinvC,NinvC).trace()
+        QC=numpy.dot(Q,C)
+        T=0.5*numpy.dot(QC,Q.transpose()) #check order!
+        T2=-0.5*numpy.dot(numpy.dot(QC,NinvC),Q.transpose()) #check order!
+        LnL=  F + S + T + T2
         LnLsum+=LnL
     return LnLsum[0][0]
 
 
 
     
+root="/astro/u/anze/work/mat/wl/datan"
+#root="data/pairs_1"
 
-
-filesG = glob.glob("data/pairs_1/g*.csv")
-filesH = glob.glob("data/pairs_1/h*.csv")
+filesG = glob.glob(root+"/g*.csv")
+filesH = glob.glob(root+"/h*.csv")
 
 CinvG=numpy.zeros((2,2))
 CinvH=numpy.zeros((2,2))
