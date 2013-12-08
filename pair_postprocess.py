@@ -55,13 +55,9 @@ for fname in filesG[:][:]:
                           [valsG[4], valsG[5]] ] )
 
         Q_normG=(QG/PG)
-        #Q_sumG+=Q_normG ####
+
         CinvG=((numpy.dot(Q_normG,Q_normG.transpose()))-(RG/PG))
-        #Cinv_sumG+=CinvG ###
-        CmG=numpy.linalg.inv(CinvG)
-        infGp=numpy.dot(CmG,Q_normG)
-
-
+        Cinv_sumG+=CinvG 
 
         PH=valsH[0]
         QH=numpy.array([[valsH[1]],
@@ -70,37 +66,9 @@ for fname in filesG[:][:]:
                           [valsH[4], valsH[5]] ] )
 
         Q_normH=(QH/PH)
-        #Q_sumH+=Q_normH ####
         CinvH=((numpy.dot(Q_normH,Q_normH.transpose()))-(RH/PH))
-        #Cinv_sumH+=CinvH ####
-        CmH=numpy.linalg.inv(CinvH)
-        infHp=numpy.dot(CmH,Q_normH)
-
-
-        #print infHp,CmH
-        #print infGp,CmG
-
-        DG=CmG[0,0]*CmG[1,1]-CmG[0,1]**2
-        # TrG=CmG[0,0]+CmG[1,1]
-        # E1G=TrG/2.0+sqrt(TrG**2/4-DG)
-        # E2G=TrG/2.0-sqrt(TrG**2/4-DG)
-        # GpD=(E1G>0) and (E2G>0)
-
-        DH=CmH[0,0]*CmH[1,1]-CmH[0,1]**2
-        # TrH=CmH[0,0]+CmH[1,1]
-        # E1H=TrH/2.0+sqrt(TrH**2/4-DH)
-        # E2H=TrH/2.0-sqrt(TrH**2/4-DH)
-        # HpD=(E1H>0) and (E2H>0)
-
-        if (any(abs(infGp)>1)) or (any(abs(infHp)>1)) or (DG<0) or (DH<0):
-            continue
-        
-        
-        weG=1/(DG)
-        vecG=numpy.array(infGp.flat)
-        weH=1/(DH)
-        vecH=numpy.array(infHp.flat)
-        x.append( (weG,vecG,weH,vecH) )
+        Cinv_sumH+=CinvH
+        x.append( (Q_normG.flat, Q_normH.flat) )
         
 
         
@@ -108,17 +76,28 @@ for fname in filesG[:][:]:
     fH.close()
         
 
-Nch=12
+
+Cinv=Cinv_sumG+Cinv_sumH
+CC=l.inv(Cinv)*2*i
+Cd=(CC[0,0]+CC[1,1])/2.0
+CC=array([[Cd,0],[0,Cd]])
+
+print Cinv_sumG
+print Cinv_sumH
+print CC
+
+
+Nch=30
 
 Q=[numpy.zeros((2,2)) for a in range(Nch)]
 sw=zeros(Nch)
 i=0
 
-for weG,vecG,weH,vecH in x:
+for QG,QH in x:
     j=i%Nch
-    M=numpy.outer(vecG,vecH)
-    Q[j]+=M*weG*weH
-    sw[j]+=weG*weH
+    M=numpy.outer(dot(CC,QG),dot(CC,QH))
+    Q[j]+=M
+    sw[j]+=1
     i+=1
 
 S=zeros((2,2))
@@ -137,6 +116,7 @@ SS-=S*S
 print '--------'
 print S
 print sqrt(SS)/sqrt(Nch)
+print CC[0,0]/sqrt(i)
 
 
 

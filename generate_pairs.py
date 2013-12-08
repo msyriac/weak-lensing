@@ -1,4 +1,4 @@
-B85;95;0c#!/usr/bin/env python
+#!/usr/bin/env python
 from scipy import *
 import scipy.linalg as la
 import random
