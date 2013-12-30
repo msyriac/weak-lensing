@@ -7,7 +7,7 @@ import numpy as np
 
 def main():
     global sm, es1_,es2_,g1_,g2_
-    tol=1.49e-06
+    tol=1.49e-08
 
     g1_=-0.01
     g2_=0.02
