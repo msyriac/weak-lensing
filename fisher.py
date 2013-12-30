@@ -13,10 +13,13 @@ def main():
     g2_=0.02
     sm=0.05
 
-    Erange=np.arange(0.0,0.4,0.01)
+    Erange=np.arange(0.0,0.4,0.05)
     lF11=[]
     lF12=[]
     lF22=[]
+    leF11=[]
+    leF12=[]
+    leF22=[]
     i=1
     l=len(Erange)
     for E in Erange:
@@ -27,19 +30,25 @@ def main():
         es1_=E*cos(theta)
         es2_=E*sin(theta)
 
-        F11=dblquad(fisherIntegrand11,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
-        F12=dblquad(fisherIntegrand12,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
-        F22=dblquad(fisherIntegrand22,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
+        F11, eF11=dblquad(fisherIntegrand11,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)
+        F12, eF12=dblquad(fisherIntegrand12,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)
+        F22, eF22=dblquad(fisherIntegrand22,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)
         lF11.append(F11)
         lF22.append(F22)
         lF12.append(F12)
+        leF11.append(F11)
+        leF22.append(F22)
+        leF12.append(F12)
         print "Done ", i*100/l, " %"
         #print F11,F12,F22
         i+=1
 
-    pl.plot(Erange,lF11)
-    pl.plot(Erange,lF12)
-    pl.plot(Erange,lF22)
+    # pl.plot(Erange,lF11)
+    # pl.plot(Erange,lF12)
+    # pl.plot(Erange,lF22)
+    pl.errorbar(Erange,lF11,yerr=leF11)
+    pl.errorbar(Erange,lF12,yerr=leF12)
+    pl.errorbar(Erange,lF22,yerr=leF22)
     pl.show()
     #print LogLike(es1_,es2_,g1_,g2_,em1,em2)
     #print DLogLikeg1g2(es1_,es2_,g1_,g2_,em1,em2)
