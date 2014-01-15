@@ -11,8 +11,11 @@ import pickle
 
 #import generate_pairs as gen
 
-filesG = glob.glob("datan/g*.csv")
-filesH = glob.glob("datan/h*.csv")
+root='/astro/u/anze/work/mat/wl/'
+
+filesG = glob.glob(root+"datan/g*.csv")
+filesH = glob.glob(root+"datan/h*.csv")
+
 
 CinvG=numpy.zeros((2,2))
 CinvH=numpy.zeros((2,2))
