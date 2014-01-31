@@ -14,7 +14,8 @@ pref=['va','vb','vc']
 pl.clf()
 
 for p in pref:
-    files = glob.glob("data_fisher/"+p+"/*.csv")
+    #files = glob.glob("data_fisher/g0p02/"+p+"/*.csv")
+    files = glob.glob("data_fisher/zerog/"+p+"/*.csv")
 
     E=[]
     F11=[]
@@ -35,4 +36,5 @@ for p in pref:
     E=sorted(E)
     pl.errorbar(E,sortedF11,yerr=eF11)
 
-pl.savefig('fisher.png')#show()
+pl.savefig('fisher0.png')#show()
+#pl.show()

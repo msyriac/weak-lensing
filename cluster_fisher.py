@@ -52,8 +52,8 @@ def TestIntegrand((x1,y1)):
 def main(argv):
     global sm, es1_,es2_,g1_,g2_
 
-    g1_=0.00
-    g2_=0.00
+    g1_=0.02
+    g2_=-0.02
     sm=0.05
 
     ntheta=50
@@ -114,7 +114,7 @@ def main(argv):
     #F12,eF12=avgTheta(E,ntheta,'12',nsamples)
     row=[F,eF]
 
-    fH=open('data_fisher/'+pref+'i'+str(i)+'.csv', 'w')
+    fH=open('data_fisher/g0p02/'+pref+'i'+str(i)+'.csv', 'w')
     fH.write(','.join(str(j) for j in row) + '\n')
     fH.close()
 
