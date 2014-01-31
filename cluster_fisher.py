@@ -6,7 +6,7 @@ import numpy as np
 
 import mcint
 import random
-import sys
+import sys, getopt
 #from numba import autojit
 import time
 
@@ -47,67 +47,56 @@ def TestIntegrand((x1,y1)):
     else:
         return 0.
 
-def main():
+def main(argv):
     global sm, es1_,es2_,g1_,g2_
-    tol=1.49e-2
 
     g1_=0.00
     g2_=0.00
-    sm=0.05 #
+    sm=0.05
 
-    #MonteCarloEval(g1_,g2_,0.3,-0.3)
-    #sys.exit()
-
-    Erange=np.arange(0.0,0.4,0.01)
-    lF11=[]
-    lF12=[]
-    lF22=[]
-    leF11=[]
-    leF12=[]
-    leF22=[]
-    i=1
-    l=len(Erange)
-    start=time.time()
-
+    ntheta=50
     nsamples = 50000
-    pl.clf()
+    i=20
 
-    for E in Erange:
 
-        #E=0.3
+    try:
+        opts, args = getopt.getopt(argv,"n:1:2:e:t:i:")
+    except getopt.GetoptError:
+        print "I don't understand the arguments you passed. Run with -h to see available options."
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'python cluster_fisher.py -n <number of MC samples=50000> -1 <shear component 1=0.0> -2 <shear component 2=0.00> -e <sigma_e=0.05> -t <number of theta samples=50> -i <file index=20, E_S=i*0.005>'
+            sys.exit()
+        elif opt == "-n":
+            nsamples=int(arg)
+        elif opt == "-1":
+            g1_=float(arg)
+        elif opt == "-2":
+            g2_=float(arg)
+        elif opt == "-e":
+            sm=float(arg)
+        elif opt == "-t":
+            ntheta=float(arg)
+        elif opt == "-i":
+            i=int(arg)
 
-        F11,eF11=avgTheta(E,50,'11',nsamples)
-        F22,eF22=avgTheta(E,50,'22',nsamples)
-        #F11, eF11=dblquad(dfisherIntegrand11,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)
-        #F11, eF11 = MonteCarloEval(g1_,g2_,es1_,es2_)
-        #F11, eF11=dblquad(fisherIntegrand11,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)
-        #F12, eF12=dblquad(fisherIntegrand12,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)
-        #F22, eF22=dblquad(fisherIntegrand22,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)
-        lF11.append(F11)
-        lF22.append(F22)
-        #lF12.append(F12)
-        leF11.append(eF11)
-        leF22.append(eF22)
-        #leF12.append(eF12)
-        elapsed=time.time()-start
-        avgtime=elapsed/i
-        timeleft=avgtime*(l-i)
-        print "Done ", i*100/l, " %"
-        print "Time left is ", timeleft/60., " minutes."
-        #print F11,F12,F22
-        i+=1
 
-    #pl.plot(Erange,lF11)
-    # pl.plot(Erange,lF12)
-    # pl.plot(Erange,lF22)
-    pl.errorbar(Erange,lF11,yerr=leF11)
-    #pl.errorbar(Erange,lF12,yerr=leF12)
-    pl.errorbar(Erange,lF22,yerr=leF22)
-    pl.savefig('plto.png')
-    #pl.show()
-    #print LogLike(es1_,es2_,g1_,g2_,em1,em2)
-    #print DLogLikeg1g2(es1_,es2_,g1_,g2_,em1,em2)
-    #print fisherIntegrand(em1,em2)
+
+    #i goes from 0 to 80 so that E goes from 0 to 0.4
+    E=i*0.005
+
+
+
+    F11,eF11=avgTheta(E,ntheta,'11',nsamples)
+    F22,eF22=avgTheta(E,ntheta,'22',nsamples)
+    row=[F11,eF11,F22,eF22]
+
+    fH=open('data_fisher/'+'i'+str(i)+'.csv', 'w')
+    fH.write(','.join(str(j) for j in row) + '\n')
+    fH.close()
+
+
 
 def avgTheta(E,n,ids,nsamples):
     Integ=0.
@@ -186,5 +175,4 @@ def dfisherIntegrand11(em1,em2):
 
 
 if __name__=="__main__":
-    main()
-
+    main(sys.argv[1:])
