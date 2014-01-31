@@ -59,16 +59,17 @@ def main(argv):
     ntheta=50
     nsamples = 50000
     i=20
+    v=1
 
 
     try:
-        opts, args = getopt.getopt(argv,"n:1:2:e:t:i:")
+        opts, args = getopt.getopt(argv,"n:1:2:e:t:i:v:")
     except getopt.GetoptError:
         print "I don't understand the arguments you passed. Run with -h to see available options."
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'python cluster_fisher.py -n <number of MC samples=50000> -1 <shear component 1=0.0> -2 <shear component 2=0.00> -e <sigma_e=0.05> -t <number of theta samples=50> -i <file index=20, E_S=i*0.005>'
+            print 'python cluster_fisher.py -n <number of MC samples=50000> -1 <shear component 1=0.0> -2 <shear component 2=0.00> -e <sigma_e=0.05> -t <number of theta samples=50> -i <file index=20, E_S=i*0.005> -v <1 for F11, 2 for F22, 3 for F12>'
             sys.exit()
         elif opt == "-n":
             nsamples=int(arg)
@@ -82,6 +83,8 @@ def main(argv):
             ntheta=int(arg)
         elif opt == "-i":
             i=int(arg)
+        elif opt == "-v":
+            v=int(arg)
 
 
 
@@ -93,14 +96,25 @@ def main(argv):
     #i goes from 0 to 80 so that E goes from 0 to 0.4
     E=i*0.005
 
+    if v==1:
+        ids='11'
+        pref='va/'
+    elif v==2:
+        ids='22'
+        pref='vb/'
+    elif v==3:
+        ids='12'
+        pref='vc/'
+    else:
+        print "Invalid v option."
+        sys.exit()
 
+    F,eF=avgTheta(E,ntheta,ids,nsamples)
+    #F22,eF22=avgTheta(E,ntheta,'22',nsamples)
+    #F12,eF12=avgTheta(E,ntheta,'12',nsamples)
+    row=[F,eF]
 
-    F11,eF11=avgTheta(E,ntheta,'11',nsamples)
-    F22,eF22=avgTheta(E,ntheta,'22',nsamples)
-    F12,eF12=avgTheta(E,ntheta,'12',nsamples)
-    row=[F11,eF11,F22,eF22,F12,eF12]
-
-    fH=open('data_fisher/'+'i'+str(i)+'.csv', 'w')
+    fH=open('data_fisher/'+pref+'i'+str(i)+'.csv', 'w')
     fH.write(','.join(str(j) for j in row) + '\n')
     fH.close()
 
