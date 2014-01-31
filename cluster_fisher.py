@@ -33,6 +33,8 @@ def MonteCarloEval(g1,g2,es1,es2,ids,nsamples):
         result, error=mcint.integrate(mfisherIntegrand11,sampler(),measure=pi,n=nsamples)
     elif ids=='22':
         result, error=mcint.integrate(mfisherIntegrand22,sampler(),measure=pi,n=nsamples)
+    elif ids=='12':
+        result, error=mcint.integrate(mfisherIntegrand12,sampler(),measure=pi,n=nsamples)
     else:
         print "Invalid integrand ID. Exiting."
         sys.exit()
@@ -77,11 +79,16 @@ def main(argv):
         elif opt == "-e":
             sm=float(arg)
         elif opt == "-t":
-            ntheta=float(arg)
+            ntheta=int(arg)
         elif opt == "-i":
             i=int(arg)
 
 
+
+    fH=open('cluster_fisher_opts.csv', 'w')
+    row=[nsamples,ntheta,g1_,g2_,i]
+    fH.write(','.join(str(j) for j in row) + '\n')
+    fH.close()
 
     #i goes from 0 to 80 so that E goes from 0 to 0.4
     E=i*0.005
@@ -90,7 +97,8 @@ def main(argv):
 
     F11,eF11=avgTheta(E,ntheta,'11',nsamples)
     F22,eF22=avgTheta(E,ntheta,'22',nsamples)
-    row=[F11,eF11,F22,eF22]
+    F12,eF12=avgTheta(E,ntheta,'12',nsamples)
+    row=[F11,eF11,F22,eF22,F12,eF12]
 
     fH=open('data_fisher/'+'i'+str(i)+'.csv', 'w')
     fH.write(','.join(str(j) for j in row) + '\n')
@@ -146,6 +154,9 @@ def DDLogLikeg1g1(es1,es2,g1,g2,em1,em2):
 
 
 def fisherIntegrand12(em1,em2):
+    global es1_,es2_,g1_,g2_
+    return (DLogLikeg1g2(es1_,es2_,g1_,g2_,em1,em2)*exp(LogLike(es1_,es2_,g1_,g2_,em1,em2)))
+def mfisherIntegrand12((em1,em2)):
     global es1_,es2_,g1_,g2_
     return (DLogLikeg1g2(es1_,es2_,g1_,g2_,em1,em2)*exp(LogLike(es1_,es2_,g1_,g2_,em1,em2)))
 def fisherIntegrand11(em1,em2):
