@@ -1,22 +1,23 @@
 #!/usr/bin/env python
 
-import glob
+import glob, sys
 import csv
 import numpy
 from math import *
 import matplotlib.pyplot as p
 import scipy.linalg  as l
+import pickle
 
-files = glob.glob("run_working_1/*.csv")
+files = glob.glob("data/*.csv")
 
 Cinv=numpy.zeros((2,2))
+F=numpy.zeros((2,2))
 Qsum=0.
-appG=[-0.01,0.02]
+appG=[0.0,0.0]
 
 x=[]
 y=[]
 y2=[]
-
 i=0
 k=0
 
@@ -31,7 +32,10 @@ for fname in files:
     f = open(fname, 'r')
     reader = csv.reader(f,delimiter=',')
     for row in reader:
-        vals = [float(r) for r in (rv for rv in row if rv!='')]
+        try:
+            vals = [float(r) for r in (rv for rv in row if rv!='')]
+        except:
+            continue
         if len(vals)!=6:
             print "Invalid line, ", row
             print fname
@@ -49,6 +53,8 @@ for fname in files:
             Qsum+=Q_norm
             CinvC=((numpy.dot(Q_norm,Q_norm.transpose()))-(R/P))
             Cinv+=CinvC
+            #F+=(numpy.dot(Q_norm,Q_norm.transpose()))
+
             if False:
                 detCinv=CinvC[0,0]*CinvC[1,1]-CinvC[0,1]**2
                 CC=l.inv(CinvC)
@@ -69,15 +75,41 @@ for fname in files:
 
             if (i % freq)==0:
                 print i
-Cm=numpy.linalg.inv(Cinv)
-infGp=numpy.dot(Cm,Qsum)
+
+#F/=i
+#print F
+#Fr=numpy.zeros((2,2))
+#Fr[0,0]=9.782
+#Fr[1,1]=9.782
+#Fr[0,0]=(F[0,0]+F[1,1])/2.
+#Fr[1,1]=(F[0,0]+F[1,1])/2.
+#print Fr
+#print numpy.dot(numpy.linalg.inv(Fr),Qsum/i)
+
+F=pickle.load(open("F.pickle",'r'))
+F[0,0]=(F[0,0]+F[1,1])/2.
+F[1,1]=F[0,0]
+F[0,1]=0.
+F[1,0]=0.
+print F
+
+infGp=numpy.dot(numpy.linalg.inv(F),Qsum/i)
+
+#sys.exit()
+#Cm=numpy.linalg.inv(Cinv)
+#infGp=numpy.dot(Cm,Qsum)
 infG=[infGp.flat[0],infGp.flat[1]]
-err=[sqrt((Cm[0,0])),sqrt((Cm[1,1]))]
-sigma = [(infG[0]-appG[0])/err[0],(infG[1]-appG[1])/err[1]]
+#err=[sqrt((Cm[0,0])),sqrt((Cm[1,1]))]
+#sigma = [(infG[0]-appG[0])/err[0],(infG[1]-appG[1])/err[1]]
 #err=[0.,0.]
 #sigma=[0.,0.]
 bias=[infG[0]-appG[0],infG[1]-appG[1]]
+print "Bias is ", [-b for b in bias]
+pickle.dump([-b for b in bias],open("g06m05bias.pickle",'w'))
 biasp=[(bias[0]*100/appG[0]),(bias[1]*100/appG[1])]
+
+sys.exit()
+
 x.append(i)
 y.append(biasp[0])
 y2.append(biasp[1])
