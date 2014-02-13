@@ -8,7 +8,7 @@ g=[g1,g2]
 b=[0,1]
 
 G=pickle.load(open("G.pickle",'r'))
-N=pickle.load(open("GplusH.pickle",'r'))
+N=pickle.load(open("N.pickle",'r'))
 F=pickle.load(open("F.pickle",'r'))
 
 print G

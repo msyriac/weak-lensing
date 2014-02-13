@@ -6,6 +6,7 @@ import numpy
 from math import *
 import matplotlib.pyplot as p
 import scipy.linalg  as l
+import pickle
 
 from itertools import product
 
@@ -21,7 +22,10 @@ from itertools import product
 # of likelihoods calculated at zero shear, just find that quantity for each
 # for each set of P,Q,R values and take an average (sample mean).
 
-files = glob.glob("data/g_zero_hightol/*.csv")
+files1 = glob.glob("data/g_zero_good/*.csv")
+files2 = glob.glob("data/g_zero_good2/*.csv")
+files = files1 + files2
+#files = glob.glob("data/*.csv")
 
 F=numpy.zeros((2,2))
 Qsum=0.
@@ -159,16 +163,19 @@ for l,m,n in product(*s):
 print '--------'
 print "F matrix"
 print S
+pickle.dump(S,open('F.pickle','w'))
 print "F matrix stddev"
 print numpy.sqrt(SS)/sqrt(Nch-1.) # was Nch !!!
 
 print "G matrix"
 print GS
+pickle.dump(GS,open('G.pickle','w'))
 print "G matrix stddev"
 print numpy.sqrt(GSS)/sqrt(Nch-1.)
 
 
 print "N matrix"
 print NS
+pickle.dump(NS,open('N.pickle','w'))
 print "N matrix stddev"
 print numpy.sqrt(NSS)/sqrt(Nch-1.)
