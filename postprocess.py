@@ -8,12 +8,13 @@ import matplotlib.pyplot as p
 import scipy.linalg  as l
 import pickle
 
-files = glob.glob("data/*.csv")
+#files = glob.glob("data/g_zero_hightol/*.csv")
+files = glob.glob("data/run_working_5/*.csv")
 
 Cinv=numpy.zeros((2,2))
 F=numpy.zeros((2,2))
 Qsum=0.
-appG=[0.0,0.0]
+appG=[0.06,-0.07]
 
 x=[]
 y=[]
@@ -28,7 +29,7 @@ pedsw=0
 
 QNl=[]
 
-for fname in files:
+for fname in files[:]:
     f = open(fname, 'r')
     reader = csv.reader(f,delimiter=',')
     for row in reader:
@@ -53,7 +54,7 @@ for fname in files:
             Qsum+=Q_norm
             CinvC=((numpy.dot(Q_norm,Q_norm.transpose()))-(R/P))
             Cinv+=CinvC
-            #F+=(numpy.dot(Q_norm,Q_norm.transpose()))
+            F+=(numpy.dot(Q_norm,Q_norm.transpose()))
 
             if False:
                 detCinv=CinvC[0,0]*CinvC[1,1]-CinvC[0,1]**2
@@ -87,28 +88,32 @@ for fname in files:
 #print numpy.dot(numpy.linalg.inv(Fr),Qsum/i)
 
 F=pickle.load(open("F.pickle",'r'))
-F[0,0]=(F[0,0]+F[1,1])/2.
-F[1,1]=F[0,0]
-F[0,1]=0.
-F[1,0]=0.
+#F[0,0]=(F[0,0]+F[1,1])/2.
+#F[1,1]=F[0,0]
+#F[0,1]=0.
+#F[1,0]=0.
 print F
 
 infGp=numpy.dot(numpy.linalg.inv(F),Qsum/i)
-
+print infGp
 #sys.exit()
-#Cm=numpy.linalg.inv(Cinv)
-#infGp=numpy.dot(Cm,Qsum)
+Cm=numpy.linalg.inv(Cinv)
+infGpalt=numpy.dot(Cm,Qsum)
 infG=[infGp.flat[0],infGp.flat[1]]
+infGalt=[infGpalt.flat[0],infGpalt.flat[1]]
 #err=[sqrt((Cm[0,0])),sqrt((Cm[1,1]))]
 #sigma = [(infG[0]-appG[0])/err[0],(infG[1]-appG[1])/err[1]]
 #err=[0.,0.]
 #sigma=[0.,0.]
 bias=[infG[0]-appG[0],infG[1]-appG[1]]
-print "Bias is ", [-b for b in bias]
+biasalt=[infGalt[0]-appG[0],infGalt[1]-appG[1]]
+print "Bias with F estimator is ", [-b for b in bias]
+print "Bias is otherwise ", [-b for b in biasalt]
 pickle.dump([-b for b in bias],open("g06m05bias.pickle",'w'))
+sys.exit()
+
 biasp=[(bias[0]*100/appG[0]),(bias[1]*100/appG[1])]
 
-sys.exit()
 
 x.append(i)
 y.append(biasp[0])
