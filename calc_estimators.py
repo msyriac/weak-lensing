@@ -5,7 +5,7 @@ import csv
 import numpy
 from math import *
 import matplotlib.pyplot as p
-import scipy.linalg  as l
+import scipy.linalg  as linalg
 import pickle
 
 from itertools import product
@@ -22,10 +22,11 @@ from itertools import product
 # of likelihoods calculated at zero shear, just find that quantity for each
 # for each set of P,Q,R values and take an average (sample mean).
 
-files1 = glob.glob("data/g_zero_good/*.csv")
-files2 = glob.glob("data/g_zero_good2/*.csv")
-files = files1 + files2
-#files = glob.glob("data/*.csv")
+#files = glob.glob("data/g_zero_hightol/*.csv")
+#files1 = glob.glob("data/g_zero_good/*.csv")
+#files2 = glob.glob("data/g_zero_good2/*.csv")
+#files = files1 #+ files2
+files = glob.glob("data/*.csv")
 
 F=numpy.zeros((2,2))
 Qsum=0.
@@ -44,7 +45,10 @@ b=[0,1]
 s=[b,b,b]
 Nch=30
 
+RP=numpy.zeros((2,2)) 
+
 Fc=[numpy.zeros((2,2)) for a in range(Nch)]
+Rc=[numpy.zeros((2,2)) for a in range(Nch)]
 Gc=[numpy.zeros((2,2,2)) for a in range(Nch)]
 Nc=[numpy.zeros((2,2,2)) for a in range(Nch)]
 sw=numpy.zeros(Nch)
@@ -73,7 +77,7 @@ for fname in files:
             Q_norm=(Q/P)
             #Qsum+=Q_norm
 
-            Find=numpy.outer(Q_norm,Q_norm)
+            Find=numpy.outer(Q_norm,Q_norm)-(R/P)
             #F += Find #(numpy.dot(Q_norm,Q_norm.transpose()))
 
 
@@ -91,8 +95,9 @@ for fname in files:
                 Gc[j][l,m,n]+=Gind
             
 
-    
+            RP+=(R)
             Fc[j]+=Find
+            Rc[j]+=(R/P)
             sw[j]+=1
 
             i+=1
@@ -108,7 +113,7 @@ for fname in files:
 #Fr[0,0]=(F[0,0]+F[1,1])/2.
 #Fr[1,1]=(F[0,0]+F[1,1])/2.
 
-
+print RP/i
 #print Fr
 #print numpy.dot(numpy.linalg.inv(Fr),Qsum/i)
 
@@ -119,12 +124,14 @@ print k, " invalid lines skipped."
 f.close()
 
 
-
 i=0
 
 
 S=numpy.zeros((2,2))
 SS=numpy.zeros((2,2))
+
+RS=numpy.zeros((2,2))
+RSS=numpy.zeros((2,2))
 
 GS=numpy.zeros((2,2,2))
 GSS=numpy.zeros((2,2,2))
@@ -134,6 +141,7 @@ NSS=numpy.zeros((2,2,2))
 
 for j in range(Nch):
     Fc[j]/=(sw[j]-1.) # was sw[j] !!!
+    Rc[j]/=(sw[j]-1.) # was sw[j] !!!
     for l,m,n in product(*s):
         Nc[j][l,m,n]/=(sw[j]-1.)
         Gc[j][l,m,n]/=(sw[j]-1.)
@@ -145,10 +153,16 @@ for j in range(Nch):
 
     S+=Fc[j]
     SS+=Fc[j]*Fc[j]
+    RS+=Rc[j]
+    RSS+=Rc[j]*Rc[j]
 
 S/=Nch
 SS/=Nch
 SS-=S*S
+
+RS/=Nch
+RSS/=Nch
+RSS-=RS*RS
 
 for l,m,n in product(*s):
     GS[l,m,n]/=Nch
@@ -179,3 +193,11 @@ print NS
 pickle.dump(NS,open('N.pickle','w'))
 print "N matrix stddev"
 print numpy.sqrt(NSS)/sqrt(Nch-1.)
+
+print "R/P matrix"
+print RS
+pickle.dump(RS,open('RP.pickle','w'))
+print "R/P matrix stddev"
+print numpy.sqrt(RSS)/sqrt(Nch-1.)
+
+#print numpy.dot(linalg.inv(S),RS)
