@@ -95,7 +95,7 @@ for fname in files:
                 Gc[j][l,m,n]+=Gind
             
 
-            RP+=(R)
+            RP+=(R/P)
             Fc[j]+=Find
             Rc[j]+=(R/P)
             sw[j]+=1
