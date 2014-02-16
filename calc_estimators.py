@@ -7,7 +7,7 @@ from math import *
 import matplotlib.pyplot as p
 import scipy.linalg  as linalg
 import pickle
-
+from accumulator import *
 from itertools import product
 
 # Tell the program where you have stored P Q R values in csv
@@ -26,7 +26,7 @@ from itertools import product
 #files1 = glob.glob("data/g_zero_good/*.csv")
 #files2 = glob.glob("data/g_zero_good2/*.csv")
 #files = files1 #+ files2
-files = glob.glob("data/*.csv")
+files = glob.glob("data/g_zero_good1/*.csv")
 
 F=numpy.zeros((2,2))
 Qsum=0.
@@ -47,14 +47,21 @@ Nch=30
 
 RP=numpy.zeros((2,2)) 
 
-Fc=[numpy.zeros((2,2)) for a in range(Nch)]
-Rc=[numpy.zeros((2,2)) for a in range(Nch)]
-Gc=[numpy.zeros((2,2,2)) for a in range(Nch)]
-Nc=[numpy.zeros((2,2,2)) for a in range(Nch)]
-sw=numpy.zeros(Nch)
+Fc=Accumulator("Fisher matrix acc.",Nch)
+Oc=Accumulator("Other quantity", Nch)
+Oc2=Accumulator("Other quantity2", Nch)
 
+Rc=Accumulator("Rc matrix acc.",Nch)
+Gc=Accumulator("G matrix acc.",Nch)
+Nc=Accumulator("N matrix acc.",Nch)
 
-for fname in files:
+Nind=zeros((2,2,2))
+Gind=zeros((2,2,2))
+
+## this is the average of R/P for uncorrected quantity
+Rcorrector=-array([[0.697824,0],[0,0.697824]])
+
+for fname in files[:]:
     f = open(fname, 'r')
     reader = csv.reader(f,delimiter=',')
     for row in reader:
@@ -73,131 +80,37 @@ for fname in files:
                           [vals[2]]])
             R=numpy.array( [ [vals[3], vals[4]],
                              [vals[4], vals[5]] ] )
+            ##correction due to shitty normalization
+            R+=Rcorrector*P
 
-            Q_norm=(Q/P)
-            #Qsum+=Q_norm
+            L_i=(Q/P)
+            L_iL_iT=numpy.outer(L_i,L_i)
+            L_ij=(R/P)-L_iL_iT
 
-            Find=numpy.outer(Q_norm,Q_norm)-(R/P)
-            #F += Find #(numpy.dot(Q_norm,Q_norm.transpose()))
+            Find=-L_ij
+            Fc.accumulate(-L_ij)
+            #Oc.accumulate(R/P)
+            #Oc2.accumulate(Q/P)
+            Rc.accumulate(R/P)
 
-
-            #(G+H)
-            P2=P*P
-            P3=P2*P
-            j=i%Nch
-            
-            for l,m,n in product(*s):
-                Nind = Q[l]*R[m,n]/P2
-                Gind = Q[l]*Q[m]*Q[n]/P3
-                #N[l,m,n] += Nind
-                #G[l,m,n] += Gind
-                Nc[j][l,m,n]+=Nind
-                Gc[j][l,m,n]+=Gind
-            
-
-            RP+=(R/P)
-            Fc[j]+=Find
-            Rc[j]+=(R/P)
-            sw[j]+=1
+            #if False
+            if True:
+                P2=P*P
+                P3=P2*P
+                for l,m,n in product(*s):
+                    Nind[l,m,n] = Q[l]*R[m,n]/P2
+                    Gind[l,m,n] = Q[l]*Q[m]*Q[n]/P3
+                Nc.accumulate(Nind)
+                Gc.accumulate(Gind)
 
             i+=1
-
             if (i % freq)==0:
                 print i
-
-#N/=i
-#G/=i
-#F/=i
-#print F
-#Fr=numpy.zeros((2,2))
-#Fr[0,0]=(F[0,0]+F[1,1])/2.
-#Fr[1,1]=(F[0,0]+F[1,1])/2.
-
-print RP/i
-#print Fr
-#print numpy.dot(numpy.linalg.inv(Fr),Qsum/i)
-
 
 print i, " valid lines read."
 print k, " invalid lines skipped."
 
 f.close()
 
-
-i=0
-
-
-S=numpy.zeros((2,2))
-SS=numpy.zeros((2,2))
-
-RS=numpy.zeros((2,2))
-RSS=numpy.zeros((2,2))
-
-GS=numpy.zeros((2,2,2))
-GSS=numpy.zeros((2,2,2))
-
-NS=numpy.zeros((2,2,2))
-NSS=numpy.zeros((2,2,2))
-
-for j in range(Nch):
-    Fc[j]/=(sw[j]) 
-    Rc[j]/=(sw[j]) 
-    for l,m,n in product(*s):
-        Nc[j][l,m,n]/=(sw[j])
-        Gc[j][l,m,n]/=(sw[j])
-        NS[l,m,n]+=Nc[j][l,m,n]
-        NSS[l,m,n]+=Nc[j][l,m,n]*Nc[j][l,m,n]
-        GS[l,m,n]+=Gc[j][l,m,n]
-        GSS[l,m,n]+=Gc[j][l,m,n]*Gc[j][l,m,n]
-
-
-    S+=Fc[j]
-    SS+=Fc[j]*Fc[j]
-    RS+=Rc[j]
-    RSS+=Rc[j]*Rc[j]
-
-S/=Nch
-SS/=Nch
-SS-=S*S
-
-RS/=Nch
-RSS/=Nch
-RSS-=RS*RS
-
-for l,m,n in product(*s):
-    GS[l,m,n]/=Nch
-    GSS[l,m,n]/=Nch
-    GSS[l,m,n]-=GS[l,m,n]*GS[l,m,n]
-
-    NS[l,m,n]/=Nch
-    NSS[l,m,n]/=Nch
-    NSS[l,m,n]-=NS[l,m,n]*NS[l,m,n]
-
-
-print '--------'
-print "F matrix"
-print S
-pickle.dump(S,open('F.pickle','w'))
-print "F matrix stddev"
-print numpy.sqrt(SS)/sqrt(Nch-1.) # was Nch !!!
-
-print "G matrix"
-print GS
-pickle.dump(GS,open('G.pickle','w'))
-print "G matrix stddev"
-print numpy.sqrt(GSS)/sqrt(Nch-1.)
-
-
-print "N matrix"
-print NS
-pickle.dump(NS,open('N.pickle','w'))
-print "N matrix stddev"
-print numpy.sqrt(NSS)/sqrt(Nch-1.)
-
-print "R/P matrix"
-print RS
-pickle.dump(RS,open('RP.pickle','w'))
-print "R/P matrix stddev"
-print numpy.sqrt(RSS)/sqrt(Nch-1.)
-
-#print numpy.dot(linalg.inv(S),RS)
+for mat in [Fc,Oc,Oc2, Rc,Gc,Nc]:
+    mat.print_stat()
