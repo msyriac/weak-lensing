@@ -140,11 +140,11 @@ NS=numpy.zeros((2,2,2))
 NSS=numpy.zeros((2,2,2))
 
 for j in range(Nch):
-    Fc[j]/=(sw[j]-1.) # was sw[j] !!!
-    Rc[j]/=(sw[j]-1.) # was sw[j] !!!
+    Fc[j]/=(sw[j]) 
+    Rc[j]/=(sw[j]) 
     for l,m,n in product(*s):
-        Nc[j][l,m,n]/=(sw[j]-1.)
-        Gc[j][l,m,n]/=(sw[j]-1.)
+        Nc[j][l,m,n]/=(sw[j])
+        Gc[j][l,m,n]/=(sw[j])
         NS[l,m,n]+=Nc[j][l,m,n]
         NSS[l,m,n]+=Nc[j][l,m,n]*Nc[j][l,m,n]
         GS[l,m,n]+=Gc[j][l,m,n]
