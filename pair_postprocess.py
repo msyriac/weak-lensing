@@ -7,6 +7,8 @@ from math import *
 import matplotlib.pyplot as p
 import scipy.linalg as l
 from scipy import *
+from numba import autojit
+
 
 #import generate_pairs as gen
 
@@ -35,6 +37,31 @@ freq=1000
 x=[]
 w=[]
 
+
+def getMats(valsG):
+    PG=valsG[0]
+    QG=numpy.array([[valsG[1]],
+                    [valsG[2]]])
+    RG=numpy.array( [ [valsG[3], valsG[4]],
+                      [valsG[4], valsG[5]] ] )
+    
+    Q_normG=(QG/PG)
+    
+    CinvG=((numpy.dot(Q_normG,Q_normG.transpose()))-(RG/PG))
+    return Q_normG, CinvG
+
+
+def process(valsG, valsH, Cinv_sumG, Cinv_sumH, x):
+    
+    Q_normG,CinvG=getMats(valsG)
+    Cinv_sumG+=CinvG
+    Q_normH,CinvH=getMats(valsH)
+    Cinv_sumH+=CinvH
+
+    x.append( (Q_normG.flat, Q_normH.flat) )
+    
+
+
 for fname in filesG[:][:]:
     fG = open(fname, 'r')
     fH = open(fname.replace('g','h'),'r')
@@ -44,32 +71,10 @@ for fname in filesG[:][:]:
     for rowG, rowH in zip(readerG,readerH):
         i+=1
         if (i % freq)==0: print i
-        
         valsG = [float(r) for r in (rv for rv in rowG if rv!='')]
         valsH = [float(r) for r in (rv for rv in rowH if rv!='')]
-
-        PG=valsG[0]
-        QG=numpy.array([[valsG[1]],
-                        [valsG[2]]])
-        RG=numpy.array( [ [valsG[3], valsG[4]],
-                          [valsG[4], valsG[5]] ] )
-
-        Q_normG=(QG/PG)
-
-        CinvG=((numpy.dot(Q_normG,Q_normG.transpose()))-(RG/PG))
-        Cinv_sumG+=CinvG 
-
-        PH=valsH[0]
-        QH=numpy.array([[valsH[1]],
-                        [valsH[2]]])
-        RH=numpy.array( [ [valsH[3], valsH[4]],
-                          [valsH[4], valsH[5]] ] )
-
-        Q_normH=(QH/PH)
-        CinvH=((numpy.dot(Q_normH,Q_normH.transpose()))-(RH/PH))
-        Cinv_sumH+=CinvH
-        x.append( (Q_normG.flat, Q_normH.flat) )
         
+        process(valsG, valsH,Cinv_sumG, Cinv_sumH, x)
 
         
     fG.close()
