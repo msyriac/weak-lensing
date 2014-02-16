@@ -171,13 +171,18 @@ def main(argv):
 
 def getDerivs(tol):
 
+    #start=time.time()
+    P,Perr=dblquad (fn.IntegrandP,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=0., epsrel=tol)
+    Q1,Q1err=dblquad (fn.IntegrandQ1,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=0., epsrel=tol)
+    Q2,Q2err=dblquad (fn.IntegrandQ2,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=0., epsrel=tol)
+    R11,R11err=dblquad (fn.IntegrandR11,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=0., epsrel=tol)
+    R12,R12err=dblquad (fn.IntegrandR12,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=0., epsrel=tol)
+    R22,R22err=dblquad (fn.IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=0., epsrel=tol)
+    #end=time.time()
 
-    P=dblquad (fn.IntegrandP,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
-    Q1=dblquad (fn.IntegrandQ1,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
-    Q2=dblquad (fn.IntegrandQ2,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
-    R11=dblquad (fn.IntegrandR11,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
-    R12=dblquad (fn.IntegrandR12,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
-    R22=dblquad (fn.IntegrandR22,-1.0, 1.0, lambda x:-sqrt(1.-x*x), lambda x:sqrt(1.-x*x),epsabs=tol, epsrel=tol)[0]
+    #print abs(Perr)/P, abs(Q1err)/Q1, abs(Q2err)/Q2
+    #print abs(R11err)/R11, abs(R12err)/R12, abs(R22err)/R22
+    #print "Time taken is ", end-start, " seconds"
         
     row=[P,Q1,Q2,R11,R12,R22]
 
