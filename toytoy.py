@@ -4,6 +4,11 @@ from scipy import *
 from math import *
 
 class toytoy:
+    ## toy toy is a toy,
+    ## where we draw from a gaussain with mean mu, 
+    ## but clipped at -1..1
+    ### PQR expressions from maple
+
     def __init__ (self, mu):
         self.mu=mu
         
