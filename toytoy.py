@@ -44,7 +44,7 @@ QP=Accumulator("Q/P")
 RP=Accumulator("R/P")
 
 N=100000
-T=toytoy(0.4)
+T=toytoy(0.0)
 for cc in range(N):
     v=T.sample()
 
