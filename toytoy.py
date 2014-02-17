@@ -43,20 +43,64 @@ RPx=Accumulator("R/P unnormed")
 QP=Accumulator("Q/P")
 RP=Accumulator("R/P")
 
+FishX=Accumulator("FisherX")
+Fish=Accumulator("Fisher")
+
 N=100000
 T=toytoy(0.0)
+
 for cc in range(N):
     v=T.sample()
 
     P,Q,R=T.PQR_unnorm(v)
     QPx.accumulate(Q/P)
     RPx.accumulate(R/P)
+    FishX.accumulate(Q**2/P**2)
 
     P,Q,R=T.PQR(v)
     QP.accumulate(Q/P)
     RP.accumulate(R/P)
-
-
-for x in [QPx,RPx,QP,RP]:
+    Fish.accumulate(Q**2/P**2)
+    
+for x in [QPx,RPx,QP,RP,Fish,FishX]:
     x.print_stat()
 
+
+print '------------------------------------'
+FishI=1./Fish.x
+FishIx=1./FishX.x
+## Now let's try estimator
+Tt=toytoy(0.1)
+E=Accumulator("Estimate,true=0.1")
+Ex=Accumulator("Estimate from unnormed,true=0.1")
+
+FD=Accumulator("First loglike der")
+SD=Accumulator("Second loglike der")
+
+FDx=Accumulator("First loglike der (unnorm)")
+SDx=Accumulator("Second loglike der (unnorm)")
+
+for cc in range(N):
+    v=Tt.sample()
+
+    P,Q,R=T.PQR_unnorm(v)
+    Ex.accumulate(FishIx*(Q/P))
+    FDx.accumulate(Q/P)
+    SDx.accumulate(R/P-Q**2/P**2)
+
+    P,Q,R=T.PQR(v)
+    E.accumulate(FishI*(Q/P))
+    FD.accumulate(Q/P)
+    SD.accumulate(R/P-Q**2/P**2)
+
+
+E.print_stat()
+Ex.print_stat()
+    
+print '--------'
+for x in [FD,SD,FDx,SDx]:
+    x.get_stat()
+
+print "Bernstein like estimator"
+print -FD.mean/SD.mean
+print -FDx.mean/SDx.mean

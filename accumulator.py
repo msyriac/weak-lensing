@@ -15,20 +15,27 @@ class Accumulator:
             self.xx=obj*obj
         self.sw+=1 
 
-    def print_stat(self):
+    def get_stat(self):
         if (self.sw==0):
             return
-        print '--------------------------'
-        print "Stats for ",self.name
         self.x/=self.sw
         self.xx/=self.sw
         self.xx-=self.x*self.x
-        err=sqrt(self.xx/self.sw)
+        self.mean=self.x
+        self.err=sqrt(self.xx/self.sw)
 
+
+    def print_stat(self):
+        if (self.sw==0):
+            return
+        self.get_stat()
+        print '--------------------------'
+        print "Stats for ",self.name
+        
         print "Mean:"
-        print self.x
+        print self.mean
         print "Error:"
-        print err
+        print self.err
 
 
 
