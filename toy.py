@@ -13,9 +13,11 @@ import csv
 
 import generate_pairs as gen
 import galfunctions as fn #module containg all the analytical priors, likelihoods, derivatives
+from numba import autojit
 
 
 #Shear e with g to return eo1 and eo2
+#@autojit
 def shear (e,g):
     ee=e[0]+1j*e[1]
     gg=g[0]+1j*g[1]
@@ -24,18 +26,20 @@ def shear (e,g):
 
 
 class ToyGenerator:
-    def __init__ (self, g1, g2):
+    def __init__ (self, g1, g2,sigma_pr=0.3, sm=0.05):
         self.g1=g1
         self.g2=g2
-        
+        self.do_shear=not ((g1==0) and (g2==0))
+        self.sp2twice=2*sigma_pr**2
+        self.sm=sm
+
         ## generate lookup table so that we can sample from 
         ## prob given in eq 18 of Bernstein and Armstrong:
 
         x=linspace(0,1.0,100)
-        y=array([quad(fn.Eprior,0,emax)[0] for emax in x])
+        y=array([quad(self.Eprior,0,emax)[0] for emax in x])
         y/=y[-1]
-
-
+        
         self.genI=InterpolatedUnivariateSpline(y,x) # This is to invert the CDF right? Just making sure. - Mat
         #print self.genI
         #xx=arange(0,1,0.0001)
@@ -43,11 +47,17 @@ class ToyGenerator:
         #pylab.plot(xx,map(self.genI,xx),'r-')
         #pylab.show()
 
+    #@autojit
+    def Eprior(self,e):
+        e2=e**2
+        return e*((1-e2)**2.)*exp(-e2/(self.sp2twice))
 
+    #@autojit
     def generateE(self):
         return self.genI(random.uniform(0.,1.0))
 
 
+    #@autojit
     def generate (self):
         E=self.generateE();
         theta=random.uniform(0,2.*math.pi);
@@ -56,14 +66,15 @@ class ToyGenerator:
         #print e1,e2
 
         ##intrinsic ellipticty now shear
-        e1,e2=shear([e1,e2],[self.g1,self.g2])
+        if (self.do_shear):
+            e1,e2=shear([e1,e2],[self.g1,self.g2])
         
         ### now add error
         ok=False
         while not ok:
 
-            e1m=e1+random.gauss(0,fn.sm)
-            e2m=e2+random.gauss(0,fn.sm)
+            e1m=e1+random.gauss(0,self.sm)
+            e2m=e2+random.gauss(0,self.sm)
         
             ee=sqrt(e1**2.+e2**2.)
             if (ee<1.): ## requier they fall onto <1
@@ -72,7 +83,32 @@ class ToyGenerator:
                 print "Retrying em"
             
         return e1m,e2m
-        
+
+    #@autojit
+    def generate_multishear (self, shearlist):
+        E=self.generateE();
+        theta=random.uniform(0,2*math.pi);
+        e1g=E*cos(theta)
+        e2g=E*sin(theta)
+        e12g=[e1g,e2g]
+        e1m,e2m=0.0,0.0
+        toret=[]
+        err1=random.gauss(0,self.sm)
+        err2=random.gauss(0,self.sm)
+        for g1,g2 in shearlist:
+            #g1,g2=g12
+            e1,e2=shear(e12g,[g1,g2])
+            e1m=e1+err1
+            e2m=e2+err2
+            ee=sqrt(e1m**2.+e2m**2.)
+            if (ee<1.): ## requier they fall onto <1
+                toret.append((e1m,e2m))                
+            else:
+                toret.append(None)
+                    
+        return toret
+
+
 
 def main(argv):
 

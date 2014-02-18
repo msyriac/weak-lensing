@@ -89,7 +89,7 @@ for fname in files[:]:
 
             Find=-L_ij
             Fc.accumulate(-L_ij)
-            #Oc.accumulate(R/P)
+            Oc.accumulate(L_i)
             #Oc2.accumulate(Q/P)
             Rc.accumulate(R/P)
 
