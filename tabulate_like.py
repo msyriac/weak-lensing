@@ -11,8 +11,8 @@ import sys
 class Gridder:
     def __init__ (self,N):
         self.T=toy.ToyGenerator(0,0)
-        self.shearlist=[(0.,.0), (0.001,0.0),  (0.005,0.0),
-           (0.01,0.0), (-0.01,0.0), (0.00,0.01), (0.01/sqrt(2),0.01/sqrt(2))]
+        self.shearlist=[(0.0,0.0),(-0.01,.0), (-0.005,0.0),  (0.005,0.0),
+           (0.01,0.0),(0.2,0.0) ]
 
         self.grid=[]
         self.N=N
@@ -54,9 +54,10 @@ class Gridder:
                 cself=cPickle.load(open(fn))
                 # convert tuples to list:
                 ng=[]
-                for g in self.grid:
+                for g in cself.grid:
                     ng.append(list(g))
                 cself.grid=ng
+                print len(ng)
             else:
                 tmp=cPickle.load(open(fn))
                 for grd,grd2 in zip(cself.grid,tmp.grid):
@@ -69,6 +70,25 @@ class Gridder:
         self.shearlist=cself.shearlist
 
 
+class TabLike:
+    def __init__(self, P, Q,N):
+        self.P=P
+        self.Q=Q
+        self.N=N
+    
+    def PQ (e1m,e2m):
+        i1=int((1+e1)/2.*self.N)
+        i2=int((1+e2)/2.*self.N)
+        
+        return (self.P[i1,i2],[self.FD[i1,i2],self.FD[i2,i1]])
+
+    def Fisher(self):
+        F11=(self.Q**2/(1e-50+self.P)).sum()
+        F12=(self.Q*transpose(self.Q)/(1e-50+self.P)).sum()
+        return array([[F11,F12],[F12,F11]])
+
+
+
 def main():
     G=Gridder(200)
     Ni=100
@@ -76,9 +96,9 @@ def main():
     for i in range(Ni):
         print i,'/',Ni
         G.add_samples(N)
-        G.dump_to_file('grids/grid_%s.pickle'%sys.argv[1])
+        G.dump_to_file('grids2/grid_%s.pickle'%sys.argv[1])
 
 
 
 if __name__=="__main__":
-    main(sys.argv[1:])
+    main()
