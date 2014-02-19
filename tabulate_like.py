@@ -71,23 +71,33 @@ class Gridder:
 
 
 class TabLike:
-    def __init__(self, P, Q,N):
-        self.P=P
-        self.Q=Q
+    def __init__(self, N,P, L_i, L_ij, Fisher):
         self.N=N
+        self.P=P
+        self.L_i=L_i
+        self.L_ij=L_ij
+        self.Fisher=Fisher
+        ## we assume Fisher is diagonal here
+        self.IFisher=array([[1/Fisher[0,0], 0],[0,1/Fisher[1,1]]])
+
     
-    def PQ (e1m,e2m):
-        i1=int((1+e1)/2.*self.N)
-        i2=int((1+e2)/2.*self.N)
+    def P(self,e1m,e2m):
+        i1=int((1+e1m)/2.*self.N)
+        i2=int((1+e2m)/2.*self.N)
+        P=self.P[i,i2]
         
-        return (self.P[i1,i2],[self.FD[i1,i2],self.FD[i2,i1]])
+    def FD(self,e1m,e2m):
+        i1=int((1+e1m)/2.*self.N)
+        i2=int((1+e2m)/2.*self.N)
+        return array([self.L_i[0][i1,i2], self.L_i[1][i1,i2]])
 
-    def Fisher(self):
-        F11=(self.Q**2/(1e-50+self.P)).sum()
-        F12=(self.Q*transpose(self.Q)/(1e-50+self.P)).sum()
-        return array([[F11,F12],[F12,F11]])
-
-
+    def SD(self,e1m,e2m):
+        i1=int((1+e1m)/2.*self.N)
+        i2=int((1+e2m)/2.*self.N)
+        i00=self.L_ij[0][0][i1,i2]
+        i10=self.L_ij[1][0][i1,i2]
+        i11=self.L_ij[1][1][i1,i2]
+        return array([[i00,i10],[i10,i11]])
 
 def main():
     G=Gridder(200)

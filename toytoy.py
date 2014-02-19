@@ -70,7 +70,7 @@ print '------------------------------------'
 FishI=1./Fish.x
 FishIx=1./FishX.x
 ## Now let's try estimator
-Tt=toytoy(0.1)
+Tt=toytoy(0.9)
 E=Accumulator("Estimate,true=0.1")
 Ex=Accumulator("Estimate from unnormed,true=0.1")
 

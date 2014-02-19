@@ -18,11 +18,11 @@ class Accumulator:
     def get_stat(self):
         if (self.sw==0):
             return
-        self.x/=self.sw
-        self.xx/=self.sw
-        self.xx-=self.x*self.x
-        self.mean=self.x
-        self.err=sqrt(self.xx/self.sw)
+        self.m=self.x/self.sw
+        self.mm=self.xx/self.sw
+        self.mm-=self.m*self.m
+        self.mean=self.m
+        self.err=sqrt(self.mm/self.sw)
 
 
     def print_stat(self):

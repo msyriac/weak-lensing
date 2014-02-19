@@ -1,5 +1,8 @@
 from math import *
-from numba import autojit
+try:
+    from numba import autojit
+except:
+    pass
 
 def initGalFuncs(spr,se):
     global sp, sm, sm2, sm4, sp2,sp4, sp2twice
@@ -51,7 +54,7 @@ def PriorSecondDer12(es1,es2):
 
     return (es1*es2*(es1**8 + es2**8 - sp**4 + 2*es1**6*(-1 + 2*es2**2 - 7*sp2) - 2*es2**6*(1 + 7*sp2) - 2*es2**2*(sp2 + 5*sp**4) + es2**4*(1 + 16*sp2 + 35*sp**4) + es1**4*(1 + 6*es2**4 + 16*sp2 + 35*sp**4 - 6*es2**2*(1 + 7*sp2)) + 2*es1**2*(2*es2**6 - sp2*(1 + 5*sp2) - 3*es2**4*(1 + 7*sp2) + es2**2*(1 + 16*sp2 + 35*sp**4))))*exp(-dlta2/(2*sp2))/(((es1**2 + es2**2)**1.5*sp**4)/(-1 + es1**2 + es2**2)**2)
 
-@autojit    
+#@autojit    
 def LikeZeroDer(es1,es2):
     #eo=[es1,es2]
     #eo=shear([es1,es2],gg_)
@@ -60,7 +63,7 @@ def LikeZeroDer(es1,es2):
 
 
 
-@autojit
+#@autojit
 def LikeFirstDer1(es1,es2):
 
     dlta2=(em1-es1)**2.+(em2-es2)**2.
@@ -70,7 +73,7 @@ def LikeFirstDer1(es1,es2):
 
     return exp(-dlta2/(2.*sm2))*(-em1+em1*es12+es1-es12*es1+2.*em2*es1*es2-em1*es22-es1*es22)/sm2
 
-@autojit
+#@autojit
 def LikeFirstDer2(es1,es2):
 
     dlta2=(em1-es1)**2.+(em2-es2)**2.
@@ -78,7 +81,7 @@ def LikeFirstDer2(es1,es2):
     es22=es2**2.
     return exp(-dlta2/(2.*sm2))*(-em2+em2*es22+es2-es22*es2+2.*em1*es2*es1-em2*es12-es2*es12)/sm2
 
-@autojit
+#@autojit
 def LikeSecondDer11(es1,es2):
 
     dlta2=(em1-es1)**2.+(em2-es2)**2.
@@ -87,7 +90,7 @@ def LikeSecondDer11(es1,es2):
     return exp(-dlta2/(2.*sm2))*(((em1 - es1)*(-1. + es12) + 2.*em2*es1*es2 - (em1 + es1)*es22)**2. + (2.*em1*es1*(-1. + es12 - 3.*es22) - (-1. + 3.*es12 - es22)*(-1. + es12 - 2.*em2*es2 + es22))*sm2)/sm4
     
 
-@autojit
+#@autojit
 def LikeSecondDer22(es1,es2):
 
 
@@ -99,7 +102,7 @@ def LikeSecondDer22(es1,es2):
     return exp(-dlta2/(2.*sm2))*((em2*(1. + es12 - es22) + es2*(-1. - 2.*em1*es1 + es12 + es22))**2. + (es14 - 2.*es12*es2*(3.*em2 + es2) + (1. + 2.*em2*es2 - 3.*es22)*(-1. + es22) - 2.*em1*(es1 + es12*es1 - 3.*es1*es22))*sm2)/sm4
 
 
-@autojit
+#@autojit
 def LikeSecondDer12(es1,es2):
     dlta2=(em1-es1)**2.+(em2-es2)**2.
     es12=es1**2.
@@ -132,40 +135,40 @@ def dGaussn22(es1,es2):
 def dGaussn12(es1,es2):
     return exp((-es1**2-es2**2)/(2*sp**2))*((es1*es2)/sp**4)
 
-@autojit
+#@autojit
 def IntegrandP(es0,es1):
     return fEprior(es0,es1)*LikeZeroDer(es0,es1)
 
 
-@autojit
+#@autojit
 def IntegrandQ1(es0,es1):
     return fEprior(es0,es1)*LikeFirstDer1(es0,es1)
 
-@autojit
+#@autojit
 def IntegrandQ2(es0,es1):
     return fEprior(es0,es1)*LikeFirstDer2(es0,es1)
 
-@autojit
+#@autojit
 def IntegrandR11(es0,es1):
     return fEprior(es0,es1)*LikeSecondDer11(es0,es1)
 
-@autojit
+#@autojit
 def IntegrandR12(es0,es1):
     return fEprior(es0,es1)*LikeSecondDer12(es0,es1)
 
-@autojit
+#@autojit
 def IntegrandR22(es0,es1):
     return fEprior(es0,es1)*LikeSecondDer22(es0,es1)
 
 
 
 #Return prior as a function of |es|
-@autojit
+#@autojit
 def Eprior(e):
     e2=e**2
     return e*((1-e2)**2.)*exp(-e2/(sp2twice))
 
-@autojit
+#@autojit
 def fEprior(es1,es2):
     
     return Eprior(sqrt(es1**2.+es2**2.))

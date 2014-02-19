@@ -13,11 +13,13 @@ import csv
 
 import generate_pairs as gen
 import galfunctions as fn #module containg all the analytical priors, likelihoods, derivatives
-from numba import autojit
-
+try:
+    from numba import autojit
+except:
+    pass
 
 #Shear e with g to return eo1 and eo2
-#@autojit
+##@autojit
 def shear (e,g):
     ee=e[0]+1j*e[1]
     gg=g[0]+1j*g[1]
@@ -47,17 +49,17 @@ class ToyGenerator:
         #pylab.plot(xx,map(self.genI,xx),'r-')
         #pylab.show()
 
-    #@autojit
+    ##@autojit
     def Eprior(self,e):
         e2=e**2
         return e*((1-e2)**2.)*exp(-e2/(self.sp2twice))
 
-    #@autojit
+    ##@autojit
     def generateE(self):
         return self.genI(random.uniform(0.,1.0))
 
 
-    #@autojit
+    ##@autojit
     def generate (self):
         E=self.generateE();
         theta=random.uniform(0,2.*math.pi);
@@ -76,7 +78,7 @@ class ToyGenerator:
             e1m=e1+random.gauss(0,self.sm)
             e2m=e2+random.gauss(0,self.sm)
         
-            ee=sqrt(e1**2.+e2**2.)
+            ee=sqrt(e1m**2.+e2m**2.)
             if (ee<1.): ## requier they fall onto <1
                 ok=True
             else:
@@ -84,7 +86,7 @@ class ToyGenerator:
             
         return e1m,e2m
 
-    #@autojit
+    ##@autojit
     def generate_multishear (self, shearlist):
         E=self.generateE();
         theta=random.uniform(0,2*math.pi);
