@@ -77,6 +77,16 @@ L_i=[df1/P, transpose(df1/P)]
 L_ij=[[df1a*df1b/(Pa*Pb),df1a*transpose(df1b)/(Pa*transpose(Pb))],
       [df1a*transpose(df1b)/(Pa*transpose(Pb)),transpose(df1a*df1b/(Pa*Pb))]]
 
+for v in L_i:
+    v[scipy.isnan(v)]=0.0
+    v[scipy.isinf(v)]=0.0
+
+for vl in L_ij:
+    for v in vl:
+        v[scipy.isnan(v)]=0.0
+        v[scipy.isinf(v)]=0.0
+
+
 #N=G+H
 #K1 = \int L,, L, L,
 #K1_1111 = L11 * L1 * L1
@@ -86,10 +96,11 @@ K1 = [[[[np.zeros((200,200)) for u in b] for v in b] for w in b] for x in b]
 K2 = [[[[np.zeros((200,200)) for u in b] for v in b] for w in b] for x in b]
 for i,j,k,l in [(u,v,w,x) for u in b for v in b for w in b for x in b]:
     print "Finding Ks for index ", i, j, k, l
-    K1[i][j][k][l] = (L_ij[i][j]*L_i[k]*L_i[l]).sum()
-    K2[i][j][k][l] = (L_ij[i][j]*L_ij[k][l]).sum()
+    K1[i][j][k][l] = (L_ij[i][j]*L_i[k]*L_i[l]*P).sum()
+    K2[i][j][k][l] = (L_ij[i][j]*L_ij[k][l]*P).sum()
 
 print K1
+print K2
 
 #print Fisher.shape, L_i[0].shape, L_ij[0][0].shape
 
