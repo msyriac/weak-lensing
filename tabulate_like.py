@@ -71,12 +71,15 @@ class Gridder:
 
 
 class TabLike:
-    def __init__(self, N,P, L_i, L_ij, Fisher):
+    def __init__(self, N,P, L_i, L_ij, Fisher, K1, K2, b3):
         self.N=N
         self.P=P
         self.L_i=L_i
         self.L_ij=L_ij
         self.Fisher=Fisher
+        self.K1=K1
+        self.K2=K2
+        self.b3=b3
         ## we assume Fisher is diagonal here
         self.IFisher=array([[1/Fisher[0,0], 0],[0,1/Fisher[1,1]]])
 
