@@ -82,7 +82,8 @@ class ToyGenerator:
             if (ee<1.): ## requier they fall onto <1
                 ok=True
             else:
-                print "Retrying em"
+                pass
+                #print "Retrying em"
             
         return e1m,e2m
 

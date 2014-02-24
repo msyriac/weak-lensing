@@ -5,7 +5,6 @@ import time, glob
 import cPickle
 from scipy import *
 from math import *
-print "Starting"
 import sys
 
 class Gridder:
