@@ -33,74 +33,96 @@ class toytoy:
         R=exp(-0.5*(x-mu)**2)*2**(0.5)*(2*pi*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+pi*x**2*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))**2+pi*x**2*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))**2+pi*mu**2*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))**2-pi*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))**2-pi*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))**2-2*pi*x**2*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-2*pi*x*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))**2-2*pi*x*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))**2-2*pi*mu**2*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+2**(0.5)*pi**(0.5)*exp(-0.5*(1+mu)**2)*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-2**(0.5)*pi**(0.5)*exp(-0.5*(1+mu)**2)*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+2**(0.5)*pi**(0.5)*exp(-0.5*(-1+mu)**2)*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-2**(0.5)*pi**(0.5)*exp(-0.5*(-1+mu)**2)*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+4*pi*x*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+pi*mu**2*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))**2-2*2**(0.5)*pi**(0.5)*x*exp(-0.5*(1+mu)**2)*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))+2*2**(0.5)*pi**(0.5)*x*exp(-0.5*(1+mu)**2)*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+2*2**(0.5)*pi**(0.5)*x*exp(-0.5*(-1+mu)**2)*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-2*2**(0.5)*pi**(0.5)*x*exp(-0.5*(-1+mu)**2)*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+3*2**(0.5)*pi**(0.5)*exp(-0.5*(1+mu)**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-3*2**(0.5)*pi**(0.5)*exp(-0.5*(1+mu)**2)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-3*2**(0.5)*pi**(0.5)*exp(-0.5*(-1+mu)**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))+3*2**(0.5)*pi**(0.5)*exp(-0.5*(-1+mu)**2)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+4*exp(-(1+mu)**2)+4*exp(-(-1+mu)**2)-8*exp(-1-mu**2))/pi**(3/2)/(erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-erf(-0.5*2**(0.5)+0.5*mu*2**(0.5)))**3
         return P,Q,R
 
+    def P(self,x):
+        mu=self.mu
+        norm=0.5*2**(0.5)*pi**(0.5)*(erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-erf(-0.5*2**(0.5)+0.5*mu*2**(0.5)))
+        return exp(-(x-self.mu)**2/2)/norm
+
+    def L_i(self,x):
+        mu=self.mu
+        norm=0.5*2**(0.5)*pi**(0.5)*(erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-erf(-0.5*2**(0.5)+0.5*mu*2**(0.5)))
+        P=exp(-(x-self.mu)**2/2)/norm
+        Q=exp(-0.5*(x-mu)**2)*2**(0.5)*(pi**(0.5)*x*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-pi**(0.5)*x*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-pi**(0.5)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))+pi**(0.5)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-exp(-0.5*(1+mu)**2)*2**(0.5)+exp(-0.5*(-1+mu)**2)*2**(0.5))/pi/(erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-erf(-0.5*2**(0.5)+0.5*mu*2**(0.5)))**2
+        return Q/P
+
+    def L_ii (self,x):
+        P,Q,R=self.PQR(x)
+        return R/P-Q*Q/(P*P)
+
+    def L_iii(self,x):
+        mu=self.mu
+        # test for first der
+        #return 1/pi**(0.5)*(pi**(0.5)*x*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-pi**(0.5)*x*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-pi**(0.5)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))+pi**(0.5)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-exp(-0.5*(1+mu)**2)*2**(0.5)+exp(-0.5*(-1+mu)**2)*2**(0.5))/(erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-erf(-0.5*2**(0.5)+0.5*mu*2**(0.5)))
+        return -(-2*pi*exp(-0.5*(1+mu)**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))**2-2*pi*exp(-0.5*(1+mu)**2)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))**2-pi*exp(-0.5*(1+mu)**2)*mu**2*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))**2-pi*exp(-0.5*(1+mu)**2)*mu**2*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))**2-2*pi*exp(-0.5*(-1+mu)**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))**2-2*pi*exp(-0.5*(-1+mu)**2)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))**2+pi*exp(-0.5*(-1+mu)**2)*mu**2*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))**2+pi*exp(-0.5*(-1+mu)**2)*mu**2*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))**2+4*pi*exp(-0.5*(1+mu)**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+2*pi*exp(-0.5*(1+mu)**2)*mu**2*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+4*pi*exp(-0.5*(-1+mu)**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-2*pi*exp(-0.5*(-1+mu)**2)*mu**2*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-3*2**(0.5)*pi**(0.5)*exp(-(1+mu)**2)*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))+3*2**(0.5)*pi**(0.5)*exp(-(1+mu)**2)*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+3*2**(0.5)*pi**(0.5)*exp(-(-1+mu)**2)*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-3*2**(0.5)*pi**(0.5)*exp(-(-1+mu)**2)*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-3*2**(0.5)*pi**(0.5)*exp(-(1+mu)**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))+3*2**(0.5)*pi**(0.5)*exp(-(1+mu)**2)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-3*2**(0.5)*pi**(0.5)*exp(-(-1+mu)**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))+3*2**(0.5)*pi**(0.5)*exp(-(-1+mu)**2)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))-4*exp(-3/2*(1+mu)**2)+6*2**(0.5)*pi**(0.5)*exp(-1-mu**2)*mu*erf(0.5*2**(0.5)+0.5*mu*2**(0.5))-6*2**(0.5)*pi**(0.5)*exp(-1-mu**2)*mu*erf(-0.5*2**(0.5)+0.5*mu*2**(0.5))+4*exp(-3/2*(-1+mu)**2)-12*exp(-3/2+mu-3/2*mu**2)+12*exp(-3/2-mu-3/2*mu**2))*2**(0.5)/pi**(3/2)/(-erf(0.5*2**(0.5)+0.5*mu*2**(0.5))+erf(-0.5*2**(0.5)+0.5*mu*2**(0.5)))**3
+
+if __name__=="__main__":
+
+    from accumulator import *
+
+    QPx=Accumulator("Q/P unnormed")
+    RPx=Accumulator("R/P unnormed")
+
+    QP=Accumulator("Q/P")
+    RP=Accumulator("R/P")
+
+    FishX=Accumulator("FisherX")
+    Fish=Accumulator("Fisher")
+
+    N=100000
+    T=toytoy(0.0)
+
+    for cc in range(N):
+        v=T.sample()
+
+        P,Q,R=T.PQR_unnorm(v)
+        QPx.accumulate(Q/P)
+        RPx.accumulate(R/P)
+        FishX.accumulate(Q**2/P**2)
+
+        P,Q,R=T.PQR(v)
+        QP.accumulate(Q/P)
+        RP.accumulate(R/P)
+        Fish.accumulate(Q**2/P**2)
+
+    for x in [QPx,RPx,QP,RP,Fish,FishX]:
+        x.print_stat()
 
 
-from accumulator import *
+    print '------------------------------------'
+    FishI=1./Fish.x
+    FishIx=1./FishX.x
+    ## Now let's try estimator
+    Tt=toytoy(0.9)
+    E=Accumulator("Estimate,true=0.1")
+    Ex=Accumulator("Estimate from unnormed,true=0.1")
 
-QPx=Accumulator("Q/P unnormed")
-RPx=Accumulator("R/P unnormed")
+    FD=Accumulator("First loglike der")
+    SD=Accumulator("Second loglike der")
 
-QP=Accumulator("Q/P")
-RP=Accumulator("R/P")
+    FDx=Accumulator("First loglike der (unnorm)")
+    SDx=Accumulator("Second loglike der (unnorm)")
 
-FishX=Accumulator("FisherX")
-Fish=Accumulator("Fisher")
+    for cc in range(N):
+        v=Tt.sample()
 
-N=100000
-T=toytoy(0.0)
+        P,Q,R=T.PQR_unnorm(v)
+        Ex.accumulate(FishIx*(Q/P))
+        FDx.accumulate(Q/P)
+        SDx.accumulate(R/P-Q**2/P**2)
 
-for cc in range(N):
-    v=T.sample()
-
-    P,Q,R=T.PQR_unnorm(v)
-    QPx.accumulate(Q/P)
-    RPx.accumulate(R/P)
-    FishX.accumulate(Q**2/P**2)
-
-    P,Q,R=T.PQR(v)
-    QP.accumulate(Q/P)
-    RP.accumulate(R/P)
-    Fish.accumulate(Q**2/P**2)
-    
-for x in [QPx,RPx,QP,RP,Fish,FishX]:
-    x.print_stat()
+        P,Q,R=T.PQR(v)
+        E.accumulate(FishI*(Q/P))
+        FD.accumulate(Q/P)
+        SD.accumulate(R/P-Q**2/P**2)
 
 
-print '------------------------------------'
-FishI=1./Fish.x
-FishIx=1./FishX.x
-## Now let's try estimator
-Tt=toytoy(0.9)
-E=Accumulator("Estimate,true=0.1")
-Ex=Accumulator("Estimate from unnormed,true=0.1")
+    E.print_stat()
+    Ex.print_stat()
 
-FD=Accumulator("First loglike der")
-SD=Accumulator("Second loglike der")
+    print '--------'
+    for x in [FD,SD,FDx,SDx]:
+        x.get_stat()
 
-FDx=Accumulator("First loglike der (unnorm)")
-SDx=Accumulator("Second loglike der (unnorm)")
-
-for cc in range(N):
-    v=Tt.sample()
-
-    P,Q,R=T.PQR_unnorm(v)
-    Ex.accumulate(FishIx*(Q/P))
-    FDx.accumulate(Q/P)
-    SDx.accumulate(R/P-Q**2/P**2)
-
-    P,Q,R=T.PQR(v)
-    E.accumulate(FishI*(Q/P))
-    FD.accumulate(Q/P)
-    SD.accumulate(R/P-Q**2/P**2)
-
-
-E.print_stat()
-Ex.print_stat()
-    
-print '--------'
-for x in [FD,SD,FDx,SDx]:
-    x.get_stat()
-
-print "Bernstein like estimator"
-print -FD.mean/SD.mean
-print -FDx.mean/SDx.mean
+    print "Bernstein like estimator"
+    print -FD.mean/SD.mean
+    print -FDx.mean/SDx.mean

@@ -83,6 +83,7 @@ L_i=[fixar(ders[1]/ders[0]), fixar(transpose(ders[1]/ders[0]))]
 L_ij=[[fixar(ders[2]/ders[0]-L_i[0]**2), fixar(crossder/ders[0]-L_i[0]*L_i[1])],
       [fixar(crossder/ders[0]-L_i[0]*L_i[1]), fixar(transpose(ders[2]/ders[0]))-L_i[1]**2]]
 
+
 F=zeros((2,2))
 for i in range(2):
     for j in range(2):
@@ -98,33 +99,29 @@ F=array([[Fd,0],[0,Fd]])
 FI=array([[1/Fd,0],[0,1/Fd]])
 print F
 
-b=[0,1]
-K1 = zeros((2,2,2,2))
-K2 = zeros((2,2,2,2))
-for i,j,k,l in [(u,v,w,x) for u in b for v in b for w in b for x in b]:
-    print "Finding Ks for index ", i, j, k, l
-    K1[i,j,k,l] = (L_ij[i][j]*L_i[k]*L_i[l]*P).sum()
-    K2[i,j,k,l] = (L_ij[i][j]*L_ij[k][l]*P).sum()
+# b=[0,1]
+# K1 = zeros((2,2,2,2))
+# K2 = zeros((2,2,2,2))
+# for i,j,k,l in [(u,v,w,x) for u in b for v in b for w in b for x in b]:
+#     print "Finding Ks for index ", i, j, k, l
+#     K1[i,j,k,l] = (L_ij[i][j]*L_i[k]*L_i[l]*P).sum()
+#     K2[i,j,k,l] = (L_ij[i][j]*L_ij[k][l]*P).sum()
 
-print K1
-print K2
+# print K1
+# print K2
 
-## let us find the b-matrix then
-b3=zeros((2,2,2,2))
-for i,j,k,l,m in [(u,v,w,x,p) for u in b for v in b for w in b for x in b for p in b]:
-    b3[i,k,l,m]+=FI[i,j]*(K1[j,k,l,m]+K2[j,k,l,m])
 
-print b3
+## Let's do one dimension, can rotate later, use letter Q for derivative
+Q_i=L_i[0]
+Q_ii=L_ij[0][0]
+Q_iii=fixar(ders[3]/ders[0]-3*ders[2]*ders[1]/ders[0]**2 + 2*ders[1]**3/ders[0]**3)
 
-#now say delta
-for dtheta in [[0.1,0.0],[0.0,0.2],[0.2/sqrt(2),0.2/sqrt(2)]]:
-    error=zeros(2)
-    for i,j,k,l in [(u,v,w,x) for u in b for v in b for w in b for x in b]:
-        error[i]+=b3[i,j,k,l]*dtheta[j]*dtheta[k]*dtheta[l]
+QFi=1/(Q_i*Q_i*P).sum()
+print QFi,FI[0,0]
 
-    print dtheta,error
-## This seems to obey the symmetries we want
-## but order of magnitude too big
+b3a=QFi*(Q_i*(Q_iii+3*Q_ii*Q_i+Q_i**3)*P).sum()/6.0
+
+print "bias b3a=",b3a
 
 I=TabLike(G.N,P,L_i, L_ij, F, K1, K2, b3)
 cPickle.dump(I,open(root+'/tablike.pickle','w'),-1)
