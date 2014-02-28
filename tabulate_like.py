@@ -5,14 +5,13 @@ import time, glob
 import cPickle
 from scipy import *
 from math import *
-print "Starting"
 import sys
 
 class Gridder:
     def __init__ (self,N):
         self.T=toy.ToyGenerator(0,0)
-        self.shearlist=[(0.0,0.0),(-0.01,.0), (-0.005,0.0),  (0.005,0.0),
-           (0.01,0.0),(0.2,0.0) ]
+        self.shearlist=[(0.0,0.0),(0.05, 0.00), (0.1, 0.0),  (0.05,0.05),
+           (0.1,0.05) ]
 
         self.grid=[]
         self.N=N
@@ -104,12 +103,12 @@ class TabLike:
 
 def main():
     G=Gridder(200)
-    Ni=100
+    Ni=200
     N=400000
     for i in range(Ni):
         print i,'/',Ni
         G.add_samples(N)
-        G.dump_to_file('grids2/grid_%s.pickle'%sys.argv[1])
+        G.dump_to_file('grids4/grid_%s.pickle'%sys.argv[1])
 
 
 

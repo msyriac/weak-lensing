@@ -7,7 +7,7 @@ from accumulator import *
 import scipy.linalg as la
 
 print "starting"
-I=cPickle.load(open('grids2/tablike.pickle'))
+I=cPickle.load(open('grids4/tablike.pickle'))
 
 
 N=10000

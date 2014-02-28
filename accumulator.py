@@ -15,14 +15,53 @@ class Accumulator:
             self.xx=obj*obj
         self.sw+=1 
 
-    def get_stat(self):
+    def get_stat(self, mpireduce=None, tagofs=0):
         if (self.sw==0):
             return
-        self.m=self.x/self.sw
-        self.mm=self.xx/self.sw
-        self.mm-=self.m*self.m
-        self.mean=self.m
-        self.err=sqrt(self.mm/self.sw)
+        if (mpireduce):
+            X=self.x*1.0
+            XX=self.xx*1.0
+            rank=mpireduce.Get_rank()
+            size=mpireduce.Get_size()
+            if rank == 0:
+                for i in range(1,size):
+                    data=X*0.0
+                    mpireduce.Recv(data, source=i, tag=tagofs+1)
+                    X+=data
+                    data=XX*0.0
+                    mpireduce.Recv(data, source=i, tag=tagofs+2)
+                    XX+=data
+            else:
+                mpireduce.Send(X,dest=0,tag=tagofs+1)
+                mpireduce.Send(XX,dest=0,tag=tagofs+2)
+                ## need to get mean, error back
+                data=X*0.0
+                mpireduce.Recv(data,source=0, tag=tagofs+3)
+                self.mean=data
+                data=X*0.0
+                mpireduce.Recv(data,source=0, tag=tagofs+4)
+                self.err=data
+
+                return
+
+            
+            SW=self.sw*size
+        else:
+            X=x
+            XX=XX
+            SW=sw
+
+        m=X/SW
+        mm=XX/SW
+        mm-=m*m
+        self.mean=m
+        self.err=sqrt(mm/SW)
+        if (mpireduce):
+            for i in range(1,size):
+                mpireduce.Send(self.mean,dest=i,tag=tagofs+3)
+                mpireduce.Send(self.err,dest=i,tag=tagofs+4)
+
+                
 
 
     def print_stat(self):
