@@ -70,15 +70,15 @@ class Gridder:
 
 
 class TabLike:
-    def __init__(self, N,P, L_i, L_ij, Fisher, K1, K2, b3):
+    def __init__(self, N,P, L_i, L_ij, Fisher, E3, M13I):
         self.N=N
         self.P=P
         self.L_i=L_i
         self.L_ij=L_ij
         self.Fisher=Fisher
-        self.K1=K1
-        self.K2=K2
-        self.b3=b3
+        self.E3=E3
+        self.M13I=M13I
+
         ## we assume Fisher is diagonal here
         self.IFisher=array([[1/Fisher[0,0], 0],[0,1/Fisher[1,1]]])
 
@@ -92,6 +92,11 @@ class TabLike:
         i1=int((1+e1m)/2.*self.N)
         i2=int((1+e2m)/2.*self.N)
         return array([self.L_i[0][i1,i2], self.L_i[1][i1,i2]])
+
+    def E3D(self,e1m,e2m):
+        i1=int((1+e1m)/2.*self.N)
+        i2=int((1+e2m)/2.*self.N)
+        return self.E3[i1,i2]
 
     def SD(self,e1m,e2m):
         i1=int((1+e1m)/2.*self.N)

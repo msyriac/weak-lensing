@@ -3,6 +3,7 @@
 from tabulate_like import *
 import sys,scipy
 import pylab
+import scipy.linalg  as la
 print "starting"
 
 G=Gridder(200)
@@ -116,14 +117,22 @@ Q_i=L_i[0]
 Q_ii=L_ij[0][0]
 Q_iii=fixar(ders[3]/ders[0]-3*ders[2]*ders[1]/ders[0]**2 + 2*ders[1]**3/ders[0]**3)
 
+
 QFi=1/(Q_i*Q_i*P).sum()
 print QFi,FI[0,0]
-
 b3a=QFi*(Q_i*(Q_iii+3*Q_ii*Q_i+Q_i**3)*P).sum()/6.0
-
 print "bias b3a=",b3a
 
-I=TabLike(G.N,P,L_i, L_ij, F, K1, K2, b3)
+
+E1=Q_i
+E3=Q_iii+3*Q_ii*Q_i+Q_i**3
+M13=array([[(E1*E1*P).sum(), (E1*E3*P).sum()/6],
+   [(E3*E1*P).sum(), (E3*E3*P).sum()/6]])
+print M13
+M13I=la.inv(M13)
+print M13I
+
+I=TabLike(G.N,P,L_i, L_ij, F, E3, M13I)
 cPickle.dump(I,open(root+'/tablike.pickle','w'),-1)
 print "done"
 
