@@ -47,9 +47,9 @@ class Accumulator:
             
             SW=self.sw*size
         else:
-            X=x
-            XX=XX
-            SW=sw
+            X=self.x*1.0
+            XX=self.xx*1.0
+            SW=self.sw
 
         m=X/SW
         mm=XX/SW

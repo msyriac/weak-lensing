@@ -4,10 +4,10 @@ import scipy.linalg as la
 import random
 
 class Pairs:
-    def __init__(self, sigmad=0.02):
-        cross11=0.7
+    def __init__(self, sigmad=0.05):
+        cross11=0.5
         cross12=0.3
-        cross22=0.6
+        cross22=0.5
         sigmad2=sigmad**2
         self.cov = zeros((4,4))
         for i  in range(4):

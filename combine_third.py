@@ -84,7 +84,16 @@ L_i=[fixar(ders[1]/ders[0]), fixar(transpose(ders[1]/ders[0]))]
 L_ij=[[fixar(ders[2]/ders[0]-L_i[0]**2), fixar(crossder/ders[0]-L_i[0]*L_i[1])],
       [fixar(crossder/ders[0]-L_i[0]*L_i[1]), fixar(transpose(ders[2]/ders[0]))-L_i[1]**2]]
 
+pylab.figure()
+pylab.imshow(L_ij[0][1]*P,extent=(-1,1,-1,1))
+pylab.colorbar()
+pylab.savefig('dog1.pdf')
+pylab.figure()
+pylab.imshow(transpose(L_ij[0][1]*P),extent=(-1,1,-1,1))
+pylab.colorbar()
+pylab.savefig('dog2.pdf')
 
+stop()
 F=zeros((2,2))
 for i in range(2):
     for j in range(2):
@@ -94,6 +103,7 @@ for i in range(2):
         F[i,j]=Fisher
         
 print F
+stop()
 ## now let's fix F according to what we think it should be
 Fd=(F[0,0]+F[1,1])/2
 F=array([[Fd,0],[0,Fd]])
